@@ -231,13 +231,13 @@ public class gui {
             public void actionPerformed(ActionEvent e) {
                 try {
                     client.updateAnnonce(titleAnnonceField.getText(), contentArea.getText(), Integer.parseInt(priceField.getText()), memoryAnnonce.getId());
+                    titleAnnonceField.setText("");
+                    contentArea.setText("");
+                    priceField.setText("");
                 } catch (InvalidAlgorithmParameterException | NoSuchPaddingException | IllegalBlockSizeException |
                          IOException | NoSuchAlgorithmException | BadPaddingException | InvalidKeyException ex) {
                     throw new RuntimeException(ex);
                 }
-                titleAnnonceField.setText("");
-                contentArea.setText("");
-                priceField.setText("");
             }
         });
         removeAnnonceButton.addActionListener(new ActionListener() {

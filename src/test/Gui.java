@@ -2,6 +2,7 @@ package test;
 
 import main.client.Client;
 import main.protocol.*;
+import main.server.Annonce;
 import main.server.Server;
 import org.junit.After;
 import org.junit.Before;
@@ -11,12 +12,12 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
-import javax.swing.*;
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Arrays;
 import java.util.logging.LogManager;
 
 import static org.awaitility.Awaitility.await;
@@ -107,7 +108,7 @@ public class Gui {
         this.removeAnnonce(this.alice, Domain.HOUSE, annonce1Title, ErrorLogMessage.NOT_RESPONDING_TO_REQUEST);
     }
 
-    private void updateAnnonce(Client client, Domain dom, String title, String titleUpdated, String contentUpdated, int priceUpdated) {
+    private void updateAnnonceProcess (Client client, Domain dom, String title, String titleUpdated, String contentUpdated, int priceUpdated) {
         assert client.getGui().getDomainJList().isEnabled();
         assert client.getGui().getAnnonceJList().isEnabled();
         client.getGui().clickOnDomain(dom);
@@ -121,10 +122,16 @@ public class Gui {
         client.getGui().getPriceField().setText(String.valueOf(priceUpdated));
         client.getGui().clickUpdateAnnonce();
         await().until(() -> client.getLastRequest().getCommand() == ProtocolCommand.UPDATE_ANNONCE_OK);
-        assert this.getLastMessageConsole(client).equals(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_ANNONCE_UPDATED_OK).toString().substring(11));
+        assert this.getLastMessageConsole(client).equals(this.removeHeaderClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_ANNONCE_UPDATED_OK).toString()));
         client.getGui().clickUpdateCheckBox();
         assert client.getGui().getDomainJList().isEnabled();
         assert client.getGui().getAnnonceJList().isEnabled();
+    }
+
+    private void updateAnnonce(Client client, Domain dom, String title, String titleUpdated, String contentUpdated, int priceUpdated) {
+        this.updateAnnonceProcess(client, dom, title, titleUpdated, contentUpdated, priceUpdated);
+        await().until(() -> this.alice.getLastRequest().getCommand() == ProtocolCommand.ANNONCE_FROM_DOMAIN_OK);
+        assert this.getLastMessageConsole(client).equals(this.removeHeaderClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_ANNONCE_FROM_DOMAIN_OK, Arrays.toString(new Annonce[]{new Annonce(usernameAlice, Domain.HOUSE, titleUpdated, contentUpdated, priceUpdated, 0)})).toString()));
     }
 
     private void updateAnnonce(Client client, Domain dom, String title, String titleUpdated, String contentUpdated, int priceUpdated, ErrorLogMessage error) throws InterruptedException {
@@ -206,13 +213,13 @@ public class Gui {
     private void createAnnonce(Client client, String title, Domain dom, String content, int price) {
         this.createAnnonceProcess(client, title, dom, content, price);
         await().until(() -> client.getLastRequest().getCommand() == ProtocolCommand.CREATE_ANNONCE_OK);
-        assert this.getLastMessageConsole(client).equals(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_ANNONCE_CREATED_OK, title).toString().substring(11));
+        assert this.getLastMessageConsole(client).equals(this.removeHeaderClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_ANNONCE_CREATED_OK, title).toString()));
     }
 
     private void createAnnonce(Client client, String title, Domain dom, String content, int price, ErrorLogMessage error) {
         this.createAnnonceProcess(client, title, dom, content, price);
         await().until(() -> client.getLastRequest().getCommand() == ProtocolCommand.CREATE_ANNONCE_KO);
-        assert this.getLastMessageConsole(client).equals(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_ANNONCE_CREATED_KO, error.getContent()).toString().substring(11));
+        assert this.getLastMessageConsole(client).equals(this.removeHeaderClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_ANNONCE_CREATED_KO, error.getContent()).toString()));
     }
 
     private boolean domainInComboBox(Client client, Domain dom) {
@@ -225,11 +232,10 @@ public class Gui {
     private void connect(Client client) {
         client.getGui().clickConnect();
         await().until(fieldIn(client).ofType(SecretKey.class), notNullValue());
-        assert this.getLastMessageConsole(client).equals(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SOCKET_OPEN).toString().substring(11));
+        assert this.getLastMessageConsole(client).equals(this.removeHeaderClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SOCKET_OPEN).toString()));
     }
-    
-    //todo: sign up with empty name
-    private void signUpProcess(Client client, String mail, String pwd, String name) {
+
+    private void signUpSetFieldsAndClick(Client client, String mail, String pwd, String name) {
         client.getGui().getMailField().setText(mail);
         client.getGui().getPwdField().setText(pwd);
         client.getGui().getUsernameField().setText(name);
@@ -237,42 +243,39 @@ public class Gui {
     }
 
     private void signUp(Client client, String mail, String pwd, String name) {
-        this.signUpProcess(client, mail, pwd, name);
+        this.signUpSetFieldsAndClick(client, mail, pwd, name);
         await().until(() -> client.getLastRequest().getCommand() == ProtocolCommand.SIGN_UP_OK);
-        assert this.getLastMessageConsole(client).equals(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SIGN_UP_OK, mail, name).toString().substring(11));
+        assert this.getLastMessageConsole(client).equals(this.removeHeaderClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SIGN_UP_OK, mail, name).toString()));
     }
     
     private void signUp(Client client, String mail, String pwd, String name, ErrorLogMessage error) {
-        this.signUpProcess(client, mail, pwd, name);
+        this.signUpSetFieldsAndClick(client, mail, pwd, name);
         await().until(() -> client.getLastRequest().getCommand() == ProtocolCommand.SIGN_UP_KO);
-        assert this.getLastMessageConsole(client).equals(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SIGN_UP_KO, error.getContent()).toString().substring(11));
+        assert this.getLastMessageConsole(client).equals(this.removeHeaderClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SIGN_UP_KO, error.getContent()).toString()));
     }
     
-    private void signInProcess(Client client, String mail, String pwd) {
+    private void signInSetFieldsAndClick(Client client, String mail, String pwd) {
         client.getGui().setMail(mail);
         client.getGui().setPwd(pwd);
         client.getGui().clickSignIn();
     }
     
     private void signIn(Client client, String mail, String pwd) {
-        this.signInProcess(client, mail, pwd);
-        //System.out.println(client.getLastRequest().getCommand());
+        this.signInSetFieldsAndClick(client, mail, pwd);
         await().until(() -> client.getLastRequest().getCommand() == ProtocolCommand.SIGN_IN_OK);
-        assert this.getLastMessageConsole(client).equals(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SIGN_IN_OK, mail).toString().substring(11));
-        //await().until(() -> client.getLastRequest().getCommand() == ProtocolCommand.UDP_SERVER_OK);
-        //assert this.getLastMessageConsole(client).equals(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_UDP_SERVER_OK, mail).toString().substring(11));
+        assert this.getLastMessageConsole(client).equals(this.removeHeaderClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SIGN_IN_OK, mail).toString()));
     }
 
     private void signIn(Client client, String mail, String pwd, ErrorLogMessage error) {
-        this.signInProcess(client, mail, pwd);
+        this.signInSetFieldsAndClick(client, mail, pwd);
         await().until(() -> client.getLastRequest().getCommand() == ProtocolCommand.SIGN_IN_KO);
-        assert this.aliceGetLastMessageConsole().equals(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SIGN_IN_KO, error.getContent()).toString().substring(11));
+        assert this.aliceGetLastMessageConsole().equals(this.removeHeaderClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SIGN_IN_KO, error.getContent()).toString()));
     }
 
     private void signOut(Client client) {
         client.getGui().clickSignOut();
         await().until(() -> client.getLastRequest().getCommand() == ProtocolCommand.SIGN_OUT_OK);
-        assert this.aliceGetLastMessageConsole().equals(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SIGN_OUT_OK).toString().substring(11));
+        assert this.aliceGetLastMessageConsole().equals(this.removeHeaderClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SIGN_OUT_OK).toString()));
     }
 
     private void signOut(Client client, ErrorLogMessage error) {
@@ -327,6 +330,10 @@ public class Gui {
             return client.getMessage("Console");
         else
             return client.getMessage("Console").substring(client.getMessage("Console").lastIndexOf("\n")).replace("\n", "");
+    }
+
+    private String removeHeaderClientConsole(String s) {
+        return s.substring(11);
     }
 
     @After

@@ -80,10 +80,6 @@ public class Client implements Runnable, ClientToServerRequestProtocol, ClientPr
 
     public void openConnection() throws IOException {
         try {
-            //System.setProperty("javax.net.ssl.trustStore", "clienttrust");
-            // SSLSocketFactory ssf = (SSLSocketFactory) SSLSocketFactory.getDefault();
-            // this.socket = (SSLSocket) ssf.createSocket("127.0.0.1", 1234);
-            // this.socket.startHandshake();
             this.socket = new Socket("127.0.0.1", 1234);
         } catch (IOException e) {
             this.logger.info(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_UNREACHABLE_SERVER).toString());
@@ -164,6 +160,7 @@ public class Client implements Runnable, ClientToServerRequestProtocol, ClientPr
     }
 
     public void processInput(Request req) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+        System.out.println(req);
         switch (req.getCommand()) {
             case REQUEST_EXCHANGE_SERVER_PUBLIC_KEY_OK -> this.requestPublicKeyOk(req);
             case REQUEST_EXCHANGE_SERVER_PUBLIC_KEY_KO -> this.requestPublicKeyKo(req);
@@ -491,7 +488,7 @@ public class Client implements Runnable, ClientToServerRequestProtocol, ClientPr
     public byte[] generate16Bytes() throws NoSuchAlgorithmException, IOException {
         if (TEST) {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] pwdHash = digest.digest(new BufferedReader(new FileReader("pwd")).readLine().getBytes(StandardCharsets.UTF_8));
+            byte[] pwdHash = digest.digest(new BufferedReader(new FileReader("initVect")).readLine().getBytes(StandardCharsets.UTF_8));
             return Arrays.copyOfRange(pwdHash, 0, 12);
         }
         else {

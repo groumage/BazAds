@@ -100,7 +100,8 @@ public class Server implements Runnable {
         if (testServer) {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] pwdHash = digest.digest(new BufferedReader(new FileReader("pwd")).readLine().getBytes(StandardCharsets.UTF_8));
-            this.addClient("alice@gmail.com", "Alice", Arrays.toString(pwdHash));
+            this.addClient("alice@gmail.com", "Alice", "test");
+            //this.addClient("alice@gmail.com", "Alice", Arrays.toString(pwdHash));
             this.addClient("bob@gmail.com", "Bob", Arrays.toString(pwdHash));
             this.annonces.add(new Annonce("alice@gmail.com", Domain.HOUSE, "Big House", "Content of the annonce", 1000, 0));
             this.annonces.add(new Annonce("bob@gmail.com", Domain.HOUSE, "Big House 2", "Content of the annonce 2", 2000, 1));
