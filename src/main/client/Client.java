@@ -28,6 +28,7 @@ import main.gui.gui;
 import org.apache.commons.codec.binary.Base64;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.awaitility.Awaitility.await;
 
 public class Client implements Runnable, ClientToServerRequestProtocol, ClientProcessResponseProtocol {
     private static final boolean TEST = true;
@@ -54,8 +55,10 @@ public class Client implements Runnable, ClientToServerRequestProtocol, ClientPr
     private Domain[] domains;
     private HashMap<String, String> messages;
     private DatagramSocket serverUDP;
+    private HashMap <String, UDPCoordinate> coordinateUDPServer;
+    private boolean UDPServer;
 
-    public Client(String mail, String name, boolean setVisibleFrame) throws NoSuchAlgorithmException, IOException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException, InterruptedException {
+    public Client(String mail, String name, boolean setVisibleFrame, boolean UDPServer) throws NoSuchAlgorithmException, IOException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException, InterruptedException {
         this.logger = Logger.getLogger("LogClient_" + mail);
         fh = new FileHandler("LogClient_" + mail + ".log");
         this.logger.addHandler(fh);
@@ -65,6 +68,9 @@ public class Client implements Runnable, ClientToServerRequestProtocol, ClientPr
 
         this.state = ClientState.DISCONNECTED;
         this.logger.info("[STATUS] " + this.state);
+
+        this.UDPServer = UDPServer;
+        this.coordinateUDPServer = new HashMap<>();
 
         this.initializeKey();
         this.messages = new HashMap<>();
@@ -117,12 +123,15 @@ public class Client implements Runnable, ClientToServerRequestProtocol, ClientPr
     private Request receiveUDPRequest() throws IOException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         byte[] json_bytes = new byte[1024];
         DatagramPacket recv = new DatagramPacket(json_bytes, json_bytes.length);
+        //System.out.println(json_bytes.length);
         this.serverUDP.receive(recv);
-        String json_str = new String(json_bytes);
+        int len = recv.getLength();
+        String json_str = new String(recv.getData(), 0, len);
+        System.out.println(json_str);
         Request request;
         if (!json_str.contains("command")) {
             byte[] iv = Arrays.copyOfRange(json_bytes, 0, 12);
-            json_str = new String(Arrays.copyOfRange(json_bytes, 12, json_bytes.length));
+            // json_str = new String(Arrays.copyOfRange(json_bytes, 12, json_bytes.length));
             String s = decrypt("AES/GCM/NoPadding", json_str, this.sk, iv);
             Gson gson = new GsonBuilder().registerTypeAdapter(Request.class, new RequestDeserializer()).create();
             request = gson.fromJson(s, Request.class);
@@ -182,6 +191,7 @@ public class Client implements Runnable, ClientToServerRequestProtocol, ClientPr
             case REMOVE_ANNONCE_KO -> this.removeAnnonceKo(req);
             case UDP_SERVER_OK -> this.udpServerOk(req);
             case UDP_SERVER_KO -> this.udppServerKo(req);
+            case REQUEST_UDP_COORDINATES_OK -> this.requestUDPServerOk(req);
             default -> System.out.println("error 2");
         }
         // at this point, the last request has been already processed
@@ -286,6 +296,12 @@ public class Client implements Runnable, ClientToServerRequestProtocol, ClientPr
         this.sendRequest(request);
     }
 
+    @Override
+    public void requestUDPCoordinate(String mail) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, IOException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        Request request = new Request(ProtocolCommand.REQUEST_UDP_COORDINATES, mail);
+        this.sendRequest(request);
+    }
+
     public String byteToHex(byte num) {
         char[] hexDigits = new char[2];
         hexDigits[0] = Character.forDigit((num >> 4) & 0xF, 16);
@@ -309,7 +325,7 @@ public class Client implements Runnable, ClientToServerRequestProtocol, ClientPr
     }
 
     public static void main (String[] args) throws NoSuchAlgorithmException, IOException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException, InterruptedException {
-        new Thread(new Client("alice@gmail.com", "Alice", true)).start();
+        new Thread(new Client("alice@gmail.com", "Alice", true, false)).start();
     }
 
     @Override
@@ -359,31 +375,30 @@ public class Client implements Runnable, ClientToServerRequestProtocol, ClientPr
     @Override
     public void signInOk(Request req) throws IOException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         this.name = (String) req.getParams().get("Name");
-        /*
-        if (TEST)
-            if (this.name.equals("Alice"))
-                this.serverUDP = new DatagramSocket(12341);
-            else
-                this.serverUDP = new DatagramSocket(12342);
-        else
-            this.serverUDP = new DatagramSocket();
-        this.receiveUDPMsg = new Thread(() -> {
-            while (!this.stopReceiveCommand) {
-                try {
-                    Request reqUdp = receiveUDPRequest();
-                    processInput(reqUdp);
-                } catch (IOException | InvalidAlgorithmParameterException | NoSuchPaddingException |
-                         IllegalBlockSizeException | NoSuchAlgorithmException | BadPaddingException |
-                         InvalidKeyException | InvalidKeySpecException e) {
-                    throw new RuntimeException(e);
+        if (this.UDPServer) {
+            if (TEST) {
+                if (this.name.equals("Alice"))
+                    this.serverUDP = new DatagramSocket(12341);
+                else
+                    this.serverUDP = new DatagramSocket(12342);
+            } else
+                this.serverUDP = new DatagramSocket();
+            this.receiveUDPMsg = new Thread(() -> {
+                while (!this.stopReceiveCommand) {
+                    try {
+                        Request reqUdp = receiveUDPRequest();
+                        processInput(reqUdp);
+                    } catch (IOException | InvalidAlgorithmParameterException | NoSuchPaddingException |
+                             IllegalBlockSizeException | NoSuchAlgorithmException | BadPaddingException |
+                             InvalidKeyException | InvalidKeySpecException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
-            }
-        });
-        this.receiveUDPMsg.start();
-        //Request udpRequest = new Request(ProtocolCommand.UDP_SERVER, InetAddress.getLocalHost().getHostAddress(), this.serverUDP.getLocalPort());
-        Request udpRequest = new Request(ProtocolCommand.UDP_SERVER, InetAddress.getLocalHost().getHostAddress(), this.serverUDP.getLocalPort());
-        this.sendRequest(udpRequest);
-        */
+            });
+            this.receiveUDPMsg.start();
+            Request udpRequest = new Request(ProtocolCommand.UDP_SERVER, InetAddress.getLocalHost().getHostAddress(), this.serverUDP.getLocalPort());
+            this.sendRequest(udpRequest);
+        }
         this.gui.changeView(PerspectiveView.LOGGED);
         this.setState(ClientState.LOGGED);
         this.logger.info("[STATUS] " + this.state);
@@ -435,7 +450,6 @@ public class Client implements Runnable, ClientToServerRequestProtocol, ClientPr
     @Override
     public void domainListOk(Request req) {
         this.addMessageToLoggerAndConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_DOMAIN_LIST_OK, Arrays.toString((Domain[]) req.getParams().get("Domains"))).toString());
-        //this.gui.updateDomainList((Domain[]) req.getParams().get("Domains"));
         this.gui.setDomainList((Domain[]) req.getParams().get("Domains"));
     }
 
@@ -446,7 +460,6 @@ public class Client implements Runnable, ClientToServerRequestProtocol, ClientPr
 
     @Override
     public void annonceFromDomainOk(Request req) {
-        //System.out.println(((Annonce[]) req.getParams().get("AnnoncesFromDomain"))[1]);
         this.addMessageToLoggerAndConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_ANNONCE_FROM_DOMAIN_OK, Arrays.toString((Annonce[]) req.getParams().get("AnnoncesFromDomain"))).toString());
         this.annonces = (Annonce[]) req.getParams().get("AnnoncesFromDomain");
         this.gui.updateAnnonceList();
@@ -477,6 +490,17 @@ public class Client implements Runnable, ClientToServerRequestProtocol, ClientPr
     @Override
     public void udppServerKo(Request req) {
         this.addMessageToLoggerAndConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_UDP_SERVER_KO, req.getParams().get("Error")).toString());
+    }
+
+    @Override
+    public void requestUDPServerOk(Request req) {
+        UDPCoordinate coord = (UDPCoordinate) req.getParams().get("Coord");
+        this.coordinateUDPServer.put((String) req.getParams().get("Mail"), coord);
+    }
+
+    @Override
+    public void requestUDPServerKO(Request req) {
+
     }
 
     public SecretKey getKeyFromSecret(String password, String salt) throws NoSuchAlgorithmException, InvalidKeySpecException {
@@ -573,9 +597,25 @@ public class Client implements Runnable, ClientToServerRequestProtocol, ClientPr
         return this.messages;
     }
 
-    public void sendUDPMessage(InetAddress addr, int port, String msg) throws IOException {
-        byte[] buffer = msg.getBytes();
-        this.serverUDP.send(new DatagramPacket(buffer, buffer.length, addr, port));
+    public void sendUDPMessage(String dest, String msg) throws IOException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        // byte[] buffer = msg.getBytes();
+        if (!this.coordinateUDPServer.containsKey(dest)) {
+            this.requestUDPCoordinate(dest);
+            await().until(() -> this.coordinateUDPServer.containsKey(dest));
+        }
+        Request request = new Request(ProtocolCommand.UDP_MSG, dest, msg);
+        this.logger.info("[SEND] " + request);
+       // todo: add throw error if sk is null
+        byte[] iv = this.generate16Bytes();
+        String s = encrypt("AES/GCM/NoPadding", new Gson().toJson(request), this.sk, iv);
+        //this.dos.writeInt(iv.length + s.getBytes().length);
+        // this.dos.write(iv);
+        //this.dos.writeBytes(s);
+        byte[] result = new byte[iv.length + s.getBytes().length];
+        System.arraycopy(iv, 0, result, 0, iv.length);
+        System.arraycopy(s.getBytes(), 0, result, iv.length, s.getBytes().length);
+        this.serverUDP.send(new DatagramPacket(result, result.length, InetAddress.getByName(this.coordinateUDPServer.get(dest).getAddr()), this.coordinateUDPServer.get(dest).getPort()));
+        //this.serverUDP.send(new DatagramPacket(s.getBytes(), s.getBytes().length, InetAddress.getByName(this.coordinateUDPServer.get(dest).getAddr()), this.coordinateUDPServer.get(dest).getPort()));
     }
 
 }

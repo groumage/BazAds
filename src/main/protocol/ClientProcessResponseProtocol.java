@@ -32,4 +32,6 @@ public interface ClientProcessResponseProtocol {
     void removeAnnonceKo(Request req);
     void udpServerOk(Request req);
     void udppServerKo(Request req);
+    void requestUDPServerOk(Request req);
+    void requestUDPServerKO(Request req);
 }

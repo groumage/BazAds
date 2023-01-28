@@ -37,7 +37,7 @@ public class Request {
                 this.param.put("SendDomainList", params[2]);
             }
             case SIGN_IN_OK -> this.param.put("Name", params[0]);
-            case SIGN_IN_KO, SIGN_UP_KO, SIGN_OUT_KO, DOMAINS_LIST_KO, ANNONCE_FROM_DOMAIN_KO, REQUEST_EXCHANGE_SERVER_PUBLIC_KEY_KO, CREATE_ANNONCE_KO, UPDATE_ANNONCE_KO, REMOVE_ANNONCE_KO -> {
+            case SIGN_IN_KO, SIGN_UP_KO, SIGN_OUT_KO, DOMAINS_LIST_KO, ANNONCE_FROM_DOMAIN_KO, REQUEST_EXCHANGE_SERVER_PUBLIC_KEY_KO, CREATE_ANNONCE_KO, UPDATE_ANNONCE_KO, REMOVE_ANNONCE_KO, UDP_SERVER_KO, REQUEST_UDP_COORDINATES_KO -> {
                 this.param.put("Error", params[0]);
             }
             case CREATE_ANNONCE -> {
@@ -59,6 +59,14 @@ public class Request {
             }
             case DOMAINS_LIST_OK -> {
                 this.param.put("Domains", params[0]);
+            }
+            case REQUEST_UDP_COORDINATES -> {
+                this.param.put("Mail", params[0]);
+            }
+            case REQUEST_UDP_COORDINATES_OK -> {
+                this.param.put("Mail", params[0]);
+                this.param.put("Coord", params[1]);
+                // this.param.put("Port", params[2]);
             }
             case ANNONCE_FROM_DOMAIN -> this.param.put("Domain", params[0]);
             case ANNONCE_FROM_DOMAIN_OK -> this.param.put("AnnoncesFromDomain", params[0]);

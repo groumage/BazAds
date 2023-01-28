@@ -46,7 +46,7 @@ public class RequestDeserializer implements JsonDeserializer<Request> {
             case SIGN_OUT, SIGN_OUT_OK, UPDATE_ANNONCE_OK, UDP_SERVER_OK -> {
                 return new Request(command);
             }
-            case SIGN_UP_KO, SIGN_IN_KO, SIGN_OUT_KO, ANNONCE_FROM_DOMAIN_KO, REQUEST_EXCHANGE_SERVER_PUBLIC_KEY_KO, CREATE_ANNONCE_KO, UPDATE_ANNONCE_KO, DOMAINS_LIST_KO, REMOVE_ANNONCE_KO -> {
+            case SIGN_UP_KO, SIGN_IN_KO, SIGN_OUT_KO, ANNONCE_FROM_DOMAIN_KO, REQUEST_EXCHANGE_SERVER_PUBLIC_KEY_KO, CREATE_ANNONCE_KO, UPDATE_ANNONCE_KO, DOMAINS_LIST_KO, REMOVE_ANNONCE_KO, REQUEST_UDP_COORDINATES_KO -> {
                 String error = new Gson().fromJson(hashMap.get("Error"), String.class);
                 return new Request(command, error);
             }
@@ -95,6 +95,15 @@ public class RequestDeserializer implements JsonDeserializer<Request> {
                 String address = new Gson().fromJson(hashMap.get("Address"), String.class);
                 int port = new Gson().fromJson(hashMap.get("Port"), int.class);
                 return new Request(ProtocolCommand.UDP_SERVER, address, port);
+            }
+            case REQUEST_UDP_COORDINATES -> {
+                String mail = new Gson().fromJson(hashMap.get("Mail"), String.class);
+                return new Request(ProtocolCommand.REQUEST_UDP_COORDINATES, mail);
+            }
+            case REQUEST_UDP_COORDINATES_OK -> {
+                String mail = new Gson().fromJson(hashMap.get("Mail"), String.class);
+                UDPCoordinate coord = new Gson().fromJson(hashMap.get("Coord"), UDPCoordinate.class);
+                return new Request(ProtocolCommand.REQUEST_UDP_COORDINATES_OK, mail, coord);
             }
             default -> {
                 return null;

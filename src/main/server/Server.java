@@ -4,12 +4,11 @@ package main.server;
 import main.protocol.Domain;
 import main.protocol.TokenInternalLogMessage;
 import main.protocol.InternalLogMessage;
+import main.protocol.UDPCoordinate;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
-import javax.net.ssl.SSLServerSocketFactory;
 import java.io.*;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
@@ -31,13 +30,13 @@ public class Server implements Runnable {
     private ArrayList<ClientServer> clientsServer;
     private ArrayList<Annonce> annonces;
     private ArrayList<Domain> domains;
-    private boolean isRespondingToRequest = true;
+    private boolean isRespondingToRequest;
     private boolean stopProcess = false;
     private Logger logger;
     private FileHandler fh;
     private Map<String, UDPCoordinate> UDPCoordinates;
 
-    public boolean isMailregister(String mail) {
+    public boolean isMailRegister(String mail) {
         for (ClientServer cs : this.clientsServer)
             if (cs.getMail().equals(mail))
                 return true;
@@ -71,7 +70,7 @@ public class Server implements Runnable {
         return Base64.getEncoder().encodeToString(salt);
     }
 
-    public Server(boolean isRespondingToRequest, boolean testServer) throws NoSuchAlgorithmException, IOException, InvalidKeySpecException {
+    public Server(boolean isRespondingToRequest, boolean testServer, boolean testClose) throws NoSuchAlgorithmException, IOException, InvalidKeySpecException {
         this.initializeKey();
 
         // System.setProperty("javax.net.ssl.keyStore", "lfkeystore2");
@@ -106,6 +105,10 @@ public class Server implements Runnable {
             this.annonces.add(new Annonce("alice@gmail.com", Domain.HOUSE, "Big House", "Content of the annonce", 1000, 0));
             this.annonces.add(new Annonce("bob@gmail.com", Domain.HOUSE, "Big House 2", "Content of the annonce 2", 2000, 1));
         }
+
+        if (testClose) {
+            this.server.setSoTimeout(10);
+        }
     }
 
     public void setRespondingToRequest(boolean respondingToRequest) {
@@ -119,7 +122,7 @@ public class Server implements Runnable {
     }
 
     public static void main(String[] arg) throws NoSuchAlgorithmException, IOException, ClassNotFoundException, InvalidKeySpecException {
-        new Thread(new Server(true, true)).start();
+        new Thread(new Server(true, true, false)).start();
     }
 
     @Override
@@ -208,7 +211,7 @@ public class Server implements Runnable {
     }
 
     public void updateAnnonce(String title, String descriptif, int price, int id) {
-        for (Annonce a: this.annonces) {
+        for (Annonce a: this.annonces)
             if (a.getId() == id) {
                 a.setTitle(title);
                 a.setDescriptif(descriptif);
@@ -216,9 +219,8 @@ public class Server implements Runnable {
                 this.logger.info(new InternalLogMessage(TokenInternalLogMessage.SERVER_LOG_UPDATE_ANNONCE, a.getOwner(), a.getTitle(), a.getContent(), a.getDomain(), a.getPrice(), a.getId()).toString());
                 break;
             }
-        }
     }
-
+    /*
     private String getNameFromMail(String mail) {
         for (ClientServer cs: this.clientsServer) {
             if (cs.getMail().equals(mail))
@@ -226,6 +228,7 @@ public class Server implements Runnable {
         }
         return null;
     }
+     */
 
     public Domain[] getDomainList() {
         return this.domains.toArray(new Domain[0]);
@@ -234,8 +237,8 @@ public class Server implements Runnable {
     public Annonce[] getAnnonceListOfDomain(Domain d) {
         ArrayList<Annonce> annoncesFiltered = new ArrayList<>();
         for (Annonce a: this.annonces) {
-            // replace mail with username
-            annoncesFiltered.add(new Annonce(this.getNameFromMail(a.getOwner()), a.getDomain(), a.getTitle(), a.getContent(), a.getPrice(), a.getId()));
+           String nameFromMail = this.clientsServer.stream().filter(cs -> cs.getMail().equals(a.getOwner())).findFirst().map(ClientServer::getName).orElse(null);
+            annoncesFiltered.add(new Annonce(nameFromMail, a.getDomain(), a.getTitle(), a.getContent(), a.getPrice(), a.getId()));
         }
         annoncesFiltered.removeIf(a -> a.getDomain() != d);
         return annoncesFiltered.toArray(new Annonce[0]);
@@ -248,17 +251,15 @@ public class Server implements Runnable {
         this.annonces.removeIf(a -> a.getId() == idFromReq);
     }
 
-    public void addUDPAddressPort(String mail, String addr, int port) {
-        this.UDPCoordinates.put(mail, new UDPCoordinate(addr, port));
+    public synchronized boolean existUPCoordinate(String mail) {
+        return this.UDPCoordinates.containsKey(mail);
     }
 
-    private class UDPCoordinate {
-        private String addr;
-        private int port;
+    public synchronized UDPCoordinate getUDPCoordinateByMail(String mail) {
+        return this.UDPCoordinates.get(mail);
+    }
 
-        public UDPCoordinate(String addr, int port) {
-            this.addr = addr;
-            this.port = port;
-        }
+    public synchronized void addUDPAddressPort(String mail, String addr, int port) {
+        this.UDPCoordinates.put(mail, new UDPCoordinate(addr, port));
     }
 }

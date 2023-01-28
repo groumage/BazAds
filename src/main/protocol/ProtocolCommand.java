@@ -31,5 +31,9 @@ public enum ProtocolCommand
     REMOVE_ANNONCE_KO(),
     UDP_SERVER(),
     UDP_SERVER_OK(),
-    UDP_SERVER_KO()
+    UDP_SERVER_KO(),
+    REQUEST_UDP_COORDINATES(),
+    REQUEST_UDP_COORDINATES_OK(),
+    REQUEST_UDP_COORDINATES_KO(),
+    UDP_MSG()
 }

@@ -8,7 +8,6 @@ import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
-import java.net.InetAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.security.*;
@@ -120,6 +119,7 @@ public class ClientHandler implements Runnable, ClientToServerResponseProtocol {
             case DOMAINS_LIST -> this.responseToDomainList();
             case REMOVE_ANNONCE -> this.responseRemoveAnnonce(req);
             case UDP_SERVER -> this.responseUDPServerInsertion(req);
+            case REQUEST_UDP_COORDINATES -> this.responseUDPRequestCoordinate(req);
             default -> System.out.println("error");
         }
     }
@@ -170,7 +170,7 @@ public class ClientHandler implements Runnable, ClientToServerResponseProtocol {
         String mailFromReq = (String) req.getParams().get("Mail");
         String nameFromReq = (String) req.getParams().get("Name");
         if (this.server.isRespondingToRequest())
-            if (!this.server.isMailregister(mailFromReq))
+            if (!this.server.isMailRegister(mailFromReq))
                 if (this.server.isMailValid(mailFromReq))
                     if (this.server.isNameValid(nameFromReq)) {
                         this.server.addClient(mailFromReq, nameFromReq, (String) req.getParams().get("Pwd"));
@@ -193,7 +193,7 @@ public class ClientHandler implements Runnable, ClientToServerResponseProtocol {
         String pwdFromReq = (String) req.getParams().get("Pwd");
         boolean sendDomainList = (boolean) req.getParams().get("SendDomainList");
         if (this.server.isRespondingToRequest())
-            if (this.server.isMailregister(mailFromReq))
+            if (this.server.isMailRegister(mailFromReq))
                 if (this.server.isValidPassword(mailFromReq, pwdFromReq)) {
                     this.clientLogged = true;
                     this.mail = mailFromReq;
@@ -303,6 +303,20 @@ public class ClientHandler implements Runnable, ClientToServerResponseProtocol {
     }
 
     @Override
+    public void responseUDPRequestCoordinate(Request req) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, IOException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        Request request;
+        String mail = (String) req.getParams().get("Mail");
+        if (this.server.isRespondingToRequest())
+            if (this.server.existUPCoordinate(mail))
+                request = new Request(ProtocolCommand.REQUEST_UDP_COORDINATES_OK, mail, this.server.getUDPCoordinateByMail(mail));
+            else
+                request = new Request(ProtocolCommand.REQUEST_UDP_COORDINATES_KO, ErrorLogMessage.NOT_RESPONDING_TO_REQUEST.getContent()); //todo: change error content
+        else
+            request = new Request(ProtocolCommand.UDP_SERVER_KO, ErrorLogMessage.NOT_RESPONDING_TO_REQUEST.getContent());
+        this.sendRequest(request);
+    }
+
+    @Override
     public void responseToRequestPublicKey(Request req) throws InvalidKeySpecException, NoSuchAlgorithmException, InvalidKeyException, IOException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
         Request request;
         if (this.server.isRespondingToRequest()) {
@@ -324,7 +338,6 @@ public class ClientHandler implements Runnable, ClientToServerResponseProtocol {
         byte[] iv = new byte[12];
         new SecureRandom().nextBytes(iv);
         return iv;
-        //return new IvParameterSpec(iv);
     }
 
     public String encrypt(String algorithm, String input, SecretKey key, byte[] iv) throws InvalidAlgorithmParameterException, InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException {
