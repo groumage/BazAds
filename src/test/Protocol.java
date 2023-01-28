@@ -16,6 +16,7 @@ import javax.crypto.SecretKey;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -37,8 +38,8 @@ public class Protocol {
 
     @Before
     public void initServerAndClient() throws NoSuchAlgorithmException, IOException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException, InterruptedException, InvalidKeySpecException {
-        this.server = new Server(true, false);
-        this.alice = new Client("alice@gmail.com", "Alice", false);
+        this.server = new Server(true, false, false);
+        this.alice = new Client("alice@gmail.com", "Alice", false, false);
         new Thread(this.server).start();
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         byte[] hashPwdClient = digest.digest(new BufferedReader(new FileReader("pwd")).readLine().getBytes(StandardCharsets.UTF_8));
@@ -76,7 +77,7 @@ public class Protocol {
 
     @Test
     public void signUpKo() throws IOException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException, InterruptedException {
-        this.bob = new Client("bob@gmail.com", "Bob", false);
+        this.bob = new Client("bob@gmail.com", "Bob", false, false);
 
         this.requestPublicKeyOk();
 
@@ -539,7 +540,7 @@ public class Protocol {
         final int annonce1PriceUpdated = 1200;
         final int annonce1Id = 0;
 
-        this.bob = new Client("bob@gmail.com", "Bob", false);
+        this.bob = new Client("bob@gmail.com", "Bob", false, false);
 
         this.signInOk();
 
@@ -666,7 +667,7 @@ public class Protocol {
         final int annonce1Price = 1000;
         final int annonce1Id = 0;
 
-        this.bob = new Client("bob@gmail.com", "Bob", false);
+        this.bob = new Client("bob@gmail.com", "Bob", false, false);
 
         this.signInOk();
 
@@ -851,6 +852,61 @@ public class Protocol {
         LogParser lp = new LogParser();
         assert lp.checkLog("LogClient_alice@gmail.com.log", analyzerLogClient);
         assert lp.checkLog("LogServer.log", analyzerLogServer);
+    }
+
+    @Test
+    public void udpServerOk() throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, IOException, BadPaddingException, InvalidKeyException, InterruptedException {
+        this.alice.stopProcess();
+
+        this.alice = new Client("alice@gmail.com", "Alice", false, true);
+        this.bob = new Client("bob@gmail.com", "Bob", false, true);
+
+        // need to rewrite entirely, otherwise there is a missing line in the log fie check
+        this.alice.openConnection();
+        this.alice.requestPublicKeyAndIV();
+        await().until(fieldIn(this.alice).ofType(SecretKey.class), notNullValue());
+        this.alice.signUp("alice@gmail.com", "Alice", this.hashPwdClient);
+        await().until(() -> this.alice.getLastRequest().getCommand() == ProtocolCommand.SIGN_UP_OK);
+        this.alice.signIn("alice@gmail.com", this.hashPwdClient, false);
+        await().until(() -> this.alice.getLastRequest().getCommand() == ProtocolCommand.UDP_SERVER_OK);
+
+        this.bob.openConnection();
+        this.bob.requestPublicKeyAndIV();
+        await().until(fieldIn(this.bob).ofType(SecretKey.class), notNullValue());
+        this.bob.signUp("bob@gmail.com", "Bob", this.hashPwdClient);
+        await().until(() -> this.bob.getLastRequest().getCommand() == ProtocolCommand.SIGN_UP_OK);
+        this.bob.signIn("bob@gmail.com", this.hashPwdClient, false);
+        await().until(() -> this.alice.getLastRequest().getCommand() == ProtocolCommand.UDP_SERVER_OK);
+
+        this.alice.sendUDPMessage("bob@gmail.com", "aaaa");
+
+        Object[] expectedLogClient = {
+                ClientState.DISCONNECTED,
+                ClientState.DISCONNECTED,
+                new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SOCKET_OPEN).toString(),
+                ClientState.CONNECTED,
+                new Request(ProtocolCommand.REQUEST_EXCHANGE_SERVER_PUBLIC_KEY_AND_SEND_IV, this.alice.getPublicKey().getEncoded(), this.alice.generate16Bytes()),
+                new Request(ProtocolCommand.REQUEST_EXCHANGE_SERVER_PUBLIC_KEY_OK, new Object[] {this.server.getPk().getEncoded()}),
+                new Request(ProtocolCommand.SIGN_UP, "alice@gmail.com", "Alice", this.hashPwdClient),
+                new Request(ProtocolCommand.SIGN_UP_OK, "alice@gmail.com", "Alice"),
+                new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SIGN_UP_OK, "alice@gmail.com", "Alice").toString(),
+                new Request(ProtocolCommand.SIGN_IN, "alice@gmail.com", this.hashPwdClient, false),
+                new Request(ProtocolCommand.SIGN_IN_OK, "Alice"),
+                new Request(ProtocolCommand.UDP_SERVER, InetAddress.getLocalHost().getHostAddress(), 12341),
+                ClientState.LOGGED,
+                new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SIGN_IN_OK, "alice@gmail.com").toString(),
+                new Request(ProtocolCommand.UDP_SERVER_OK),
+                new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_UDP_SERVER_OK).toString()
+        };
+
+        Object[] expectedLogServer = {
+                new InternalLogMessage(TokenInternalLogMessage.SERVER_LOG_CLIENT_HANDLER_CREATED, 0).toString(),
+                new InternalLogMessage(TokenInternalLogMessage.SERVER_LOG_CLIENT_CREATED, "alice@gmail.com", "Alice").toString(),
+        };
+
+        LogParser lp = new LogParser();
+        // assert lp.checkLog("LogClient_alice@gmail.com.log", expectedLogClient);
+        // assert lp.checkLog("LogServer.log", expectedLogServer);
     }
 
     @After

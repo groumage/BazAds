@@ -34,8 +34,8 @@ public class Scenario {
 
     @Before
     public void initServerAndClient() throws NoSuchAlgorithmException, IOException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException, InterruptedException, InvalidKeySpecException {
-        this.server = new Server(true, false);
-        this.alice = new Client("alice@gmail.com", "Alice", false);
+        this.server = new Server(true, false, false);
+        this.alice = new Client("alice@gmail.com", "Alice", false, false);
         new Thread(this.server).start();
     }
 
@@ -169,18 +169,6 @@ public class Scenario {
         assert lp.checkLog("LogServer.log", analyzerLogServer);
     }
 
-    // todo: tester les erreurs retourné par les fct de création, modification et suppression d'annonces
-    /**
-     * client open connection -> sign up -> sign in -> receive domain -> sign out -> client close connection -> client open connection -> sign in -> receive domain -> sign out -> client close connection
-     * @throws InvalidAlgorithmParameterException
-     * @throws NoSuchPaddingException
-     * @throws IllegalBlockSizeException
-     * @throws IOException
-     * @throws NoSuchAlgorithmException
-     * @throws BadPaddingException
-     * @throws InvalidKeyException
-     * @throws ClassNotFoundException
-     */
     @Test
     public void scenarioOpenConnectionAfterCloseConnection() throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, IOException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException, ClassNotFoundException {
         this.alice.openConnection();
@@ -255,7 +243,6 @@ public class Scenario {
         assert lp.checkLog("LogClient_alice@gmail.com.log", analyzerLogClient);
         assert lp.checkLog("LogServer.log", analyzerLogServer);
     }
-
 
     @After
     public void stopServerAndStopClient() throws IOException {

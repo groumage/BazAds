@@ -49,8 +49,8 @@ public class Gui {
 
     @Before
     public void initServerAndClient() throws NoSuchAlgorithmException, IOException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException, InterruptedException, InvalidKeySpecException {
-        this.server = new Server(true, false);
-        this.alice = new Client(mailAlice, usernameAlice, false);
+        this.server = new Server(true, false, false);
+        this.alice = new Client(mailAlice, usernameAlice, false, false);
         new Thread(this.server).start();
     }
 
@@ -98,7 +98,7 @@ public class Gui {
     @Test
     public void removeAnnonceKo() throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, IOException, BadPaddingException, InvalidKeyException, InterruptedException {
         this.createAnnonceOk();
-        this.bob = new Client(mailBob, usernameBob, false);
+        this.bob = new Client(mailBob, usernameBob, false, false);
         this.createAnnonceOkCustom(this.bob, mailBob, pwdAlice, usernameBob, annonce2Title, Domain.HOUSE, annonce2Content, annonce2Price);
         this.alice.getGui().clickOnDomain(Domain.HOUSE);
         await().until(() -> this.alice.getLastRequest().getCommand() == ProtocolCommand.ANNONCE_FROM_DOMAIN_OK);
@@ -163,7 +163,7 @@ public class Gui {
     @Test
     public void updateAnnonceKo() throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, IOException, BadPaddingException, InvalidKeyException, InterruptedException {
         this.createAnnonceOk();
-        this.bob = new Client(mailBob, usernameBob, false);
+        this.bob = new Client(mailBob, usernameBob, false, false);
         this.createAnnonceOkCustom(this.bob, mailBob, pwdAlice, usernameBob, annonce2Title, Domain.HOUSE, annonce2Content, annonce2Price);
         this.alice.getGui().clickOnDomain(Domain.HOUSE);
         await().until(() -> this.alice.getLastRequest().getCommand() == ProtocolCommand.ANNONCE_FROM_DOMAIN_OK);
@@ -213,6 +213,7 @@ public class Gui {
     private void createAnnonce(Client client, String title, Domain dom, String content, int price) {
         this.createAnnonceProcess(client, title, dom, content, price);
         await().until(() -> client.getLastRequest().getCommand() == ProtocolCommand.CREATE_ANNONCE_OK);
+        // no need ANNONCE_FROM_DOMAIN_OK as for update_annonce because is the test, there is no click on a domain name
         assert this.getLastMessageConsole(client).equals(this.removeHeaderClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_ANNONCE_CREATED_OK, title).toString()));
     }
 
@@ -292,7 +293,7 @@ public class Gui {
 
     @Test
     public void signUpKo() throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, IOException, BadPaddingException, InvalidKeyException, InterruptedException {
-        this.bob = new Client(mailBob, usernameBob, false);
+        this.bob = new Client(mailBob, usernameBob, false, false);
         this.connect(this.alice);
         this.signUp(this.alice, aliceWrongMail, pwdAlice, usernameAlice, ErrorLogMessage.MAIL_NOT_VALID);
         this.signUp(this.alice, mailAlice, pwdAlice, aliceWrongUsername, ErrorLogMessage.NAME_NOT_VALID);
