@@ -54,3 +54,5 @@ jobs:
         git commit -m "Documentation for ${commithash}" && \
         git reset $(git commit-tree HEAD^{tree} -m "Documentation for ${commithash}") && \
         git push -f origin gh-pages ||:
+    
+    needs: cleanup
