@@ -1,17 +1,16 @@
 # RFC
 
-Guillaume Roumage
-April 2024
-
 ## 1. Introduction
 
-This document specifies the protocol used in the project BazAds. This project is an implementation of a client-server application to exchange goods and services.
+This document specifies the protocol used in the project BazAds.
 
-## 2. Requests from the client to the server
+## 2. Request from clients to the central server server
 
-### 2.1 Request the public key of the central server
+### 2.1 Get the public key of the central server
 
-All exchanges between a client and the central server are encrypted. Both the client and server has a public and private key pair. After exchanging public keys and performing key agreement, a shared secret is derived and then used to encrypt all subsequent communications.
+All exchanges between a client and the central server are encrypted. To that end, both the client and server has a public and private key pair. After exchanging public keys and performing key agreement, a shared secret is derived and used to encrypt all subsequent communications.
+
+#### Request
 
 `REQUEST_PUBLIC_KEY_OF_CENTRAL_SERVER (client's public key)`
 
@@ -19,27 +18,17 @@ All exchanges between a client and the central server are encrypted. Both the cl
 | :-----------------------: | :----------: |
 | Client's public key       | PublicKey    |
 
-Expected response (clickable links): [`REQUEST_PUBLIC_KEY_OF_CENTRAL_SERVER_OK`](#311-successful-send-public-key-request) or [`REQUEST_PUBLIC_KEY_OF_CENTRAL_SERVER_KO`](#312-failed-send-public-key-request).
+#### Expected responses
 
-```mermaid
-    sequenceDiagram
-    note over Client: Generate public/private key
-    note over ClientHandler: Generate public/private key
-    note over ClientHandler: Accept connection from clients
-    note over Client: Open socket to the server
-    participant Client
-    participant ClientHandler
-    Client->>ClientHandler: REQUEST_PUBLIC_KEY_OF_CENTRAL_SERVER (client's public key)
-    note over ClientHandler: Perform key agreement
-    alt success
-        ClientHandler->>Client: REQUEST__PUBLIC_KEY_OF_CENTRAL_SERVER_OK (server's public key)
-        note over Client: Perform key agreement
-    else failure
-        ClientHandler->>Client: REQUEST__PUBLIC_KEY_OF_CENTRAL_SERVER_KO (message)
-    end
-```
+[REQUEST_PUBLIC_KEY_OF_CENTRAL_SERVER_OK](#get_server_public_key_success)
 
-### 2.2 Request for sign up
+[REQUEST_PUBLIC_KEY_OF_CENTRAL_SERVER_KO](#get_server_public_key_failure)
+
+#### Sequence diagram
+
+@mermaid{request_public_key_of_central_server}
+
+### 2.2 Sign up
 
 A client has to send its mail, name and password to sign up.
 
@@ -226,7 +215,7 @@ Expected responses: [`SALE_FROM_DOMAIN_OK`](#391-successful-list-of-sales-on-a-s
 
 /**
  * @mermaid{sales_from_domain}
-*/
+ */
 
 ```mermaid
     sequenceDiagram
@@ -241,9 +230,9 @@ Expected responses: [`SALE_FROM_DOMAIN_OK`](#391-successful-list-of-sales-on-a-s
 ```
 ## 3. Request from the server to the client
 
-### 3.1 Public key requested
+### 3.1 Get the public key of the central server
 
-### 3.1.1 Successful send public key request
+### 3.1.1 Success {#get_server_public_key_success}
 
 The server send the public key to the client.
 
@@ -255,7 +244,7 @@ The server send the public key to the client.
 
 Answer to request [`REQUEST_PUBLIC_KEY_OF_CENTRAL_SERVER`](#21-request-the-public-key-of-the-server) (clickable link).
 
-### 3.1.2 Failed send public key request
+### 3.1.2 Failure {#get_server_public_key_failure}
 
 The server send an error message to the client.
 
