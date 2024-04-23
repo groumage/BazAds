@@ -224,7 +224,9 @@ A client has to send the domains from which he wants to retrieve the sales.
 
 Expected responses: [`SALE_FROM_DOMAIN_OK`](#391-successful-list-of-sales-on-a-specific-domain-request) or [`SALE_FROM_DOMAIN_KO`](#392-failed-list-of-sales-on-a-specific-domain-request).
 
-@mermaid{sales_from_domain}
+/**
+ * @mermaid{sales_from_domain}
+*/
 
 ```mermaid
     sequenceDiagram
