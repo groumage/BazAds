@@ -6,6 +6,17 @@ on:
   push:
 
 jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    permissions: write-all
+
+    steps:
+      - name: 🗑 Delete deployment
+        uses: strumwolf/delete-deployment-environment@v2
+        with:
+            token: ${{ secrets.GITHUB_TOKEN }}
+            environment: github-pages
+
   deploy:
     runs-on: ubuntu-latest
     container: docker.io/tttapa/docker-doxygen
@@ -42,3 +53,5 @@ jobs:
         git commit -m "Documentation for ${commithash}" && \
         git reset $(git commit-tree HEAD^{tree} -m "Documentation for ${commithash}") && \
         git push -f origin gh-pages ||:
+    
+    needs: cleanup
