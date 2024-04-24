@@ -598,6 +598,6 @@ Answer to request [`SALE_FROM_DOMAIN`](#sales_from_domain).
 
 The following diagram shows the serialization and deseriialization of a request. It holds when the request is encrypted, that is everytime except for the request `REQUEST_PUBLIC_KEY_OF_CENTRAL_SERVER` and their associated responses `REQUEST_PUBLIC_KEY_OF_CENTRAL_SERVER_OK` and `REQUEST_PUBLIC_KEY_OF_CENTRAL_SERVER_KO`.
 
-@mermaid{request_serialisation_deserialization}
+@mermaid{request_serialization_deserialization}
 
 [Back to top](#rfc)
