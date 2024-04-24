@@ -1,10 +1,10 @@
 # RFC {#rfc}
 
-## 1. Introduction and table of contents {#introduction}
+## 1. Introduction and table of contents {#introduction_rfc}
 
 This document specifies the protocol used in the project BazAds.
 
-1. [Introduction and table of contents](#introduction)
+1. [Introduction and table of contents](#introduction_rfc)
 2. [Request from clients to the central server](#request_from_client_to_server)
     1. [Get the public key of the central server](#get_server_public_key)
     2. [Sign up](#sign_up)

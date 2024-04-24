@@ -78,7 +78,7 @@ import protocol.RequestDeserializer;
  * 
  * @section rfc 2. RFC
  * 
- * The RFC of the project is available at the following link: <a href="https://groumage.github.io/PetitesAnnonces/Doxygen/md_src_main_java_protocol_rfc.html">RFC</a>
+ * The RFC of the project is available at the following link: <a href="https://groumage.github.io/PetitesAnnonces/Doxygen/rfc.html">RFC</a>
  * 
  * @section next_steps 3. Next steps
  * 
