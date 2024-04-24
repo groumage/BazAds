@@ -1,10 +1,10 @@
 # RFC {#rfc}
 
-## 1. Introduction and table of contents
+## 1. Introduction and table of contents {#introduction}
 
 This document specifies the protocol used in the project BazAds.
 
-1. [Introduction](#1-introduction)
+1. [Introduction and table of contents](#introduction)
 2. [Request from clients to the central server](#request_from_client_to_server)
     1. [Get the public key of the central server](#get_server_public_key)
     2. [Sign up](#sign_up)
@@ -39,7 +39,7 @@ This document specifies the protocol used in the project BazAds.
         2. [Failure](#delete_sale_failure)
     8. [List of domains](#domains_list_responses)
         1. [Success](#domains_list_success)
-        2. [Failure](#domain_list_failure)
+        2. [Failure](#domains_list_failure)
     9. [Sales from a domain](#sales_from_domain_responses)
         1. [Success](#sales_from_domain_success)
         2. [Failure](#sales_from_domain_failure)
