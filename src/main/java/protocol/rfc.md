@@ -6,7 +6,7 @@ This document specifies the protocol used in the project BazAds.
 
 ## 2. Request from clients to the central server server
 
-### 2.1 Get the public key of the central server
+### 2.1 Get the public key of the central server {#get_server_public_key}
 
 All exchanges between a client and the central server are encrypted. To that end, both the client and server has a public and private key pair. After exchanging public keys and performing key agreement, a shared secret is derived and used to encrypt all subsequent communications.
 
@@ -28,9 +28,11 @@ All exchanges between a client and the central server are encrypted. To that end
 
 @mermaid{request_public_key_of_central_server}
 
-### 2.2 Sign up
+### 2.2 Sign up {#sign_up}
 
-A client has to send its mail, name and password to sign up.
+A client requests to sign up by sending its mail, name and password.
+
+#### Request
 
 `SIGN_UP (mail, name, password)`
 
@@ -40,23 +42,21 @@ A client has to send its mail, name and password to sign up.
 | name       | String    |
 | password   | String    |
 
-Expected responses (clickable links): [`SIGN_UP_OK`](#321-successful-sign-up-request) or [`SIGN_UP_KO`](#322-failed-sign-up-request).
+#### Expected responses
 
-```mermaid
-    sequenceDiagram
-    participant Client
-    participant ClientHandler
-    Client->>ClientHandler: SIGN_UP (mail, name, password)
-    alt success
-        ClientHandler->>Client: SIGN_UP_OK (mail, name)
-    else failure
-        ClientHandler->>Client: SIGN_UP_KO (message)
-    end
-```
+[SIGN_UP_OK](#sign_up_success)
 
-### 2.3 Request for sign in
+[SIGN_UP_KO](#sign_up_failure)
 
-A client has to send its mail and password to sign in. In addition, there is a boolean value to determine if, in case of successful sign in, the server send automatically the list of the dommain sales.
+#### Sequence diagram
+
+@mermaid{sign_up}
+
+### 2.3 Sign in {#sign_in}
+
+A client requests to sign in by its mail and password to sign in. In addition, it sends a boolean value to determine if, in case of successful sign in, the server send also the list of the dommains.
+
+#### Request
 
 `SIGN_IN (mail, password, sendDomainList)`
 
@@ -66,42 +66,33 @@ A client has to send its mail and password to sign in. In addition, there is a b
 | password         | String     |
 | sendDomainList   | Boolean    |
 
-Expected responses (clickable links): [`SIGN_IN_OK`](#331-successful-sign-in-request) or [`SIGN_IN_KO`](#332-failed-sign-in-request).
+#### Expected responses
 
-```mermaid
-    sequenceDiagram
-    participant Client
-    participant ClientHandler
-    Client->>ClientHandler: SIGN_IN (mail, name, password)
-    alt success
-        opt Send domain list
-            ClientHandler->>Client: DOMAINS_LIST_OK (domains)
-        end
-        ClientHandler->>Client: SIGN_IN_OK (mail, name)
-    else failure
-        ClientHandler->>Client: SIGN_IN_KO (message)
-    end
-```
+[SIGN_IN_OK](#331-successful-sign-in-request)
 
-### 2.4 Request for sign out
+[SIGN_IN_KO](#332-failed-sign-in-request)
 
-A client just have to notify the server that he logs out. No additional parameters are needed.
+#### Sequence diagram
+
+@mermaid{sign_in}
+
+### 2.4 Request for sign out {#sign_out}
+
+A client just have to notify the server that he signs out.
+
+#### Request
 
 `SIGN_OUT`
 
-Expected responses (clickable links): [`SIGN_OUT_OK`](#341-successful-sign-out-request) or [`SIGN_OUT_KO`](#342-failed-sign-out-request).
+ #### Expected responses
+ 
+ [SIGN_OUT_OK](#sign_out_success)
+ 
+ [SIGN_OUT_KO](#sign_out_failure)
 
-```mermaid
-    sequenceDiagram
-    participant Client
-    participant ClientHandler
-    Client->>ClientHandler: SIGN_OUT (mail, name, password)
-    alt success
-        ClientHandler->>Client: SIGN_OUT_OK
-    else failure
-        ClientHandler->>Client: SIGN_OUT_KO (message)
-    end
-```
+#### Sequence diagram
+
+@mermaid{sign_out}
 
 ### 2.5 Request for create a sale
 
@@ -234,7 +225,9 @@ Expected responses: [`SALE_FROM_DOMAIN_OK`](#391-successful-list-of-sales-on-a-s
 
 ### 3.1.1 Success {#get_server_public_key_success}
 
-The server send the public key to the client.
+The server sends the public key to the client.
+
+#### Request
 
 `REQUEST_PUBLIC_KEY_OF_CENTRAL_SERVER_OK (server's public key)`
 
@@ -242,14 +235,16 @@ The server send the public key to the client.
 | :-----------------: | :--------: |
 | Server's public key | PublicKey  |
 
-Answer to request [`REQUEST_PUBLIC_KEY_OF_CENTRAL_SERVER`](#21-request-the-public-key-of-the-server) (clickable link).
+Answer to request [REQUEST_PUBLIC_KEY_OF_CENTRAL_SERVER](#get_server_public_key).
 
 ### 3.1.2 Failure {#get_server_public_key_failure}
 
-The server send an error message to the client.
+The server sends an error message to the client.
 
 Reason of failure:
 - the server process the incoming request but don't answer to them.
+
+#### Request
 
 `REQUEST_PUBLIC_KEY_OF_CENTRAL_SERVER_KO (message)`
 
@@ -257,81 +252,91 @@ Reason of failure:
 | :---------: | :--------: |
 | Message     | String     |
 
-Answer to request [`REQUEST_PUBLIC_KEY_OF_CENTRAL_SERVER`](#21-request-the-public-key-of-the-server) (clickable link).
+Answer to request [REQUEST_PUBLIC_KEY_OF_CENTRAL_SERVER](#get_server_public_key).
 
-### 3.2 Sign up requested
+### 3.2 Sign up
 
-### 3.2.1 Successful sign up request
+### 3.2.1 Success {#sign_up_success}
 
-The server send the confirmation of sign up with the mail and the name of the client.
+In case of sign up success, the server sends a confirmation of sign up with the mail and the name of the client.
+
+#### Request
 
 `SIGN_UP_OK(mail, name)`
 
 | Variable    | Type       |
 | :---------: | :--------: |
-| Mail        | String     |
-| Name        | String     |
+| mail        | String     |
+| name        | String     |
 
-Answer to request [`SIGN_UP`](#22-request-for-sign-up) (clickable link).
+Answer to request [SIGN_UP](#sign-up).
 
-### 3.2.2 Failed sign up request
+### 3.2.2 Failure {#sign_up_failure}
 
-The server send an error message to the client.
+In case of sign up failure, the server sends a message to the client indicating the error.
 
-Reason of failure:
+Reason of failures:
 - the server process the incoming request but don't answer to them;
 - the mail is not a valid format;
 - the mail is already taken;
 - the name is not valid.
 
+#### Request
+
 `SIGN_UP_KO (message)`
 
 | Variable    | Type       |
 | :---------: | :--------: |
-| Message     | String     |
+| message     | String     |
 
-Answer to request [`SIGN_UP`](#22-request-for-sign-up) (clickable link).
+Answer to request [SIGN_UP](#sign_up).
 
-## 3.3 Sign in requested
+## 3.3 Sign in
 
-### 3.3.1 Successful sign in request
+### 3.3.1 Success {#sign_in_success}
 
-The server send the confirmation of sign in with the name of the client.
+In case of sign in success, the server sends a confirmation of sign in with the name of the client.
+
+#### Request
 
 `SIGN_IN_OK (name)`
 
 | Variable    | Type       |
 | :---------: | :--------: |
-| Name        | String     |
+| name        | String     |
 
-Answer to request [`SIGN_IN`](#23-request-for-sign-in) (clickable link).
+Answer to request [SIGN_IN](#sign_in) (clickable link).
 
-### 3.3.2 Failed sign in request
+### 3.3.2 Failure {#sign_in_failure}
 
-The server send an error message to the client.
+In case of sign in failure, the server sends an error message to the client.
 
 Reason of failure:
 - the server process the incoming request but don't answer to them;
 - the mail is not registered;
 - the mail password is invalid.
 
+#### Request
+
 `SIGN_IN_KO (message)`
 
 | Variable    | Type       |
 | :---------: | :--------: |
-| Message     | String     |
+| message     | String     |
 
-Answer to request [`SIGN_IN`](#23-request-for-sign-in) (clickable link).
+Answer to request [SIGN_IN](#sign-in) (clickable link).
 
-### 3.4 Sign out requested
+### 3.4 Sign out
 
-### 3.4.1 Successful sign out request
+### 3.4.1 Success
 
-The server send the confirmation of sign out.
+The server send a confirmation of sign out.
+
+#### Request
 
 `SIGN_OUT_OK`
 
-Answer to request [`SIGN_OUT`](#24-request-for-sign-out) (clickable link).
+Answer to request [SIGN_OUT](#sign_out) (clickable link).
 
 ### 3.4.2 Failed sign out request
 
@@ -340,13 +345,16 @@ The server send an error message to the client.
 Reason of failure:
 - the server process the incoming request but don't answer to them.
 
+
+#### Request
+
 `SIGN_OUT_KO (message)`
 
 | Variable    | Type       |
 | :---------: | :--------: |
-| Message     | String     |
+| message     | String     |
 
-Answer to request [`SIGN_OUT`](#24-request-for-sign-out) (clickable link).
+Answer to request [SIGN_OUT](#sign-out) (clickable link).
 
 ## 3.5 Create a sale request
 
