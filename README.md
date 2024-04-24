@@ -6,7 +6,7 @@
 
 :bulb: A key feature of BazAds is the secure exchange of data between the client and the server. The data is encrypted using the AES algorithm and the key exchange is done using the Diffie-Hellman algorithm.
 
-:rocket: Ready to explore my project? Checkout the [documentation](#documentation)!
+:rocket: Ready to explore my project? Checkout the [documentation](https://groumage.github.io/PetitesAnnonces/Doxygen/index.html)!
 
 ## Why this project?
 

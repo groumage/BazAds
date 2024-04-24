@@ -1,10 +1,51 @@
-# RFC
+# RFC {#rfc}
 
-## 1. Introduction
+## 1. Introduction and table of contents
 
 This document specifies the protocol used in the project BazAds.
 
-## 2. Request from clients to the central server server
+1. [Introduction](#1-introduction)
+2. [Request from clients to the central server](#request_from_client_to_server)
+    1. [Get the public key of the central server](#get_server_public_key)
+    2. [Sign up](#sign_up)
+    3. [Sign in](#sign_in)
+    4. [Sign out](#sign_out)
+    5. [Create a sale](#create_sale)
+    6. [Update a sale](#update_sale)
+    7. [Delete a sale](#delete_sale)
+    8. [List of domains](#domains_list)
+    9. [Sales from a domain](#sales_from_domain)
+3. [Request from the central server to client](#request_from_server_to_client)
+    1. [Get the public key of the central server](#get_server_public_key_responses)
+        1. [Success](#get_server_public_key_success)
+        2. [Failure](#get_server_public_key_failure)
+    2. [Sign up](#sign_up_responses)
+        1. [Success](#sign_up_success)
+        2. [Failure](#sign_up_failure)
+    3. [Sign in](#sign_in_responses)
+        1. [Success](#sign_in_success)
+        2. [Failure](#sign_in_failure)
+    4. [Sign out](#sign_out_responses)
+        1. [Success](#sign_out_success)
+        2. [Failure](#sign_out_failure)
+    5. [Create a sale](#create_sale_responses)
+        1. [Success](#create_sale_success)
+        2. [Failure](#create_sale_failure)
+    6. [Update a sale](#update_sale_responses)
+        1. [Success](#update_sale_success)
+        2. [Failure](#update_sale_failure)
+    7. [Delete a sale](#delete_sale_responses)
+        1. [Success](#delete_sale_success)
+        2. [Failure](#delete_sale_failure)
+    8. [List of domains](#domains_list_responses)
+        1. [Success](#domains_list_success)
+        2. [Failure](#domain_list_failure)
+    9. [Sales from a domain](#sales_from_domain_responses)
+        1. [Success](#sales_from_domain_success)
+        2. [Failure](#sales_from_domain_failure)
+4. [Serialization and deserialization of the requests](#serialization_deserialization)
+
+## 2. Request from clients to the central server server {#request_from_client_to_server}
 
 ### 2.1 Get the public key of the central server {#get_server_public_key}
 
@@ -20,13 +61,15 @@ All exchanges between a client and the central server are encrypted. To that end
 
 #### Expected responses
 
-[REQUEST_PUBLIC_KEY_OF_CENTRAL_SERVER_OK](#get_server_public_key_success)
+[`REQUEST_PUBLIC_KEY_OF_CENTRAL_SERVER_OK`](#get_server_public_key_success)
 
-[REQUEST_PUBLIC_KEY_OF_CENTRAL_SERVER_KO](#get_server_public_key_failure)
+[`REQUEST_PUBLIC_KEY_OF_CENTRAL_SERVER_KO`](#get_server_public_key_failure)
 
 #### Sequence diagram
 
 @mermaid{request_public_key_of_central_server}
+
+[Back to top](#rfc)
 
 ### 2.2 Sign up {#sign_up}
 
@@ -44,13 +87,15 @@ A client requests to sign up by sending its mail, name and password.
 
 #### Expected responses
 
-[SIGN_UP_OK](#sign_up_success)
+[`SIGN_UP_OK`](#sign_up_success)
 
-[SIGN_UP_KO](#sign_up_failure)
+[`SIGN_UP_KO`](#sign_up_failure)
 
 #### Sequence diagram
 
 @mermaid{sign_up}
+
+[Back to top](#rfc)
 
 ### 2.3 Sign in {#sign_in}
 
@@ -68,15 +113,17 @@ A client requests to sign in by its mail and password to sign in. In addition, i
 
 #### Expected responses
 
-[SIGN_IN_OK](#331-successful-sign-in-request)
+[`SIGN_IN_OK`](#sign_in_success)
 
-[SIGN_IN_KO](#332-failed-sign-in-request)
+[`SIGN_IN_KO`](#sign_in_failure)
 
 #### Sequence diagram
 
 @mermaid{sign_in}
 
-### 2.4 Request for sign out {#sign_out}
+[Back to top](#rfc)
+
+### 2.4 Sign out {#sign_out}
 
 A client just have to notify the server that he signs out.
 
@@ -84,46 +131,50 @@ A client just have to notify the server that he signs out.
 
 `SIGN_OUT`
 
- #### Expected responses
- 
- [SIGN_OUT_OK](#sign_out_success)
- 
- [SIGN_OUT_KO](#sign_out_failure)
+#### Expected responses
+
+[`SIGN_OUT_OK`](#sign_out_success)
+
+[`SIGN_OUT_KO`](#sign_out_failure)
 
 #### Sequence diagram
 
 @mermaid{sign_out}
 
-### 2.5 Request for create a sale
+[Back to top](#rfc)
+
+### 2.5 Create a sale {#create_sale}
 
 A client has to send the domain, the name, the content and the price for the new sale.
+
+#### Request
 
 `CREATE_SALE (domain, title, content, price)`
 
 | Variable         | Type       |
 | :--------------: | :--------: |
-| domain           | String     |
+| domain           | Domain     |
 | title            | String     |
 | content          | String     |
 | price            | int        |
 
-Expected responses: [`CREATE_SALE_OK`](#351-successful-create-a-sale-request) or [`CREATE_SALE_KO`](#352-failed-create-a-sale-request).
+#### Expected responses
 
-```mermaid
-    sequenceDiagram
-    participant Client
-    participant ClientHandler
-    Client->>ClientHandler: CREATE_SALE (domain, title, content, price)
-    alt success
-        ClientHandler->>Client: CREATE_SALE_OK (title)
-    else failure
-        ClientHandler->>Client: CREATE_SALE_KO (message)
-    end
-```
+[`CREATE_SALE_OK`](#create_sale_success)
 
-### 2.6 Request for update a sale
+[`CREATE_SALE_KO`](#create_sale_failure)
+
+#### Sequence diagram
+
+@mermaid{create_sale}
+
+[Back to top](#rfc)
+
+### 2.6 Update a sale {#update_sale}
 
 A client has to send the new title, the new content, the new price of the sale and the id of the sale being updated. The domain can't be changed.
+
+#### Request
 
 `UPDATE_SALE (title, content, price, id)`
 
@@ -134,67 +185,67 @@ A client has to send the new title, the new content, the new price of the sale a
 | price            | int        |
 | id               | int        |
 
-Expected responses: [`UPDATE_SALE_OK`](#361-successful-update-a-sale-request) or [`UPDATE_SALE_KO`](#362-failed-update-a-sale-request).
+#### Expected responses
 
-```mermaid
-    sequenceDiagram
-    participant Client
-    participant ClientHandler
-    Client->>ClientHandler: UPDATE_SALE (title, content, price, id)
-    alt success
-        ClientHandler->>Client: UPDATE_SALE_OK
-    else failure
-        ClientHandler->>Client: UPDATE_SALE_KO (message)
-    end
-```
+[`UPDATE_SALE_OK`](#update_sale_success)
 
-### 2.7 Request for delete a sale
+[`UPDATE_SALE_KO`](#update_sale_failure)
+
+#### Sequence diagram
+
+@mermaid{update_sale}
+
+[Back to top](#rfc)
+
+### 2.7 Delete a sale {#delete_sale}
 
 A client has to send the id of the sale he wants to delete. A client can delete a sale only if he's its owner.
 
-`REMOVE_SALE (id)`
+#### Request
+
+`DELETE_SALE (id)`
 
 | Variable         | Type       |
 | :--------------: | :--------: |
 | id               | int        |
 
-Expected responses: [`REMOVE_SALE_OK`](#371-successful-delete-a-sale-request) or [`REMOVE_SALE_KO`](#372-failed-delete-a-sale-request).
+#### Expected responses
 
-```mermaid
-    sequenceDiagram
-    participant Client
-    participant ClientHandler
-    Client->>ClientHandler: REMOVE_SALE (id)
-    alt success
-        ClientHandler->>Client: REMOVE_SALE_OK
-    else failure
-        ClientHandler->>C   lient: REMOVE_SALE_KO (message)
-    end
-```
+[`DELETE_SALE_OK`](#delete_sale_success)
 
-### 2.8 Request for the list of domain sales
+[`DELETE_SALE_KO`](#delete_sale_failure)
+
+#### Sequence diagram
+
+@mermaid{delete_sale}
+
+[Back to top](#rfc)
+
+### 2.8 List of domains {#domains_list}
 
 A client just have to notify the server to the server that he wants the list of the domains. 
 
+#### Request
+
 `DOMAINS_LIST`
 
-Expected responses: [`DOMAINS_LIST_OK`](#381-successful-list-of-domain-sales-request) or [`DOMAINS_LIST_KO`](#382-failed-list-of-domain-sales-request).
+#### Expected responses
 
-```mermaid
-    sequenceDiagram
-    participant Client
-    participant ClientHandler
-    Client->>ClientHandler: DOMAINS_LIST (id)
-    alt success
-        ClientHandler->>Client: DOMAINS_LIST_OK (domains)
-    else failure
-        ClientHandler->>Client: DOMAINS_LIST_KO (message)
-    end
-```
+[`DOMAINS_LIST_OK`](#domains_list_success)
 
-### 2.9 Request for the sales on a specific domain
+[`DOMAINS_LIST_KO`](#domains_list_failure)
+
+#### Sequence diagram
+
+@mermaid{domains_list}
+
+[Back to top](#rfc)
+
+### 2.9 Sales from a domain {#sales_from_domain}
 
 A client has to send the domains from which he wants to retrieve the sales.
+
+#### Request
 
 `SALES_FROM_DOMAIN (domain)`
 
@@ -202,26 +253,21 @@ A client has to send the domains from which he wants to retrieve the sales.
 | :--------------: | :--------: |
 | domain           | Domain     |
 
-Expected responses: [`SALE_FROM_DOMAIN_OK`](#391-successful-list-of-sales-on-a-specific-domain-request) or [`SALE_FROM_DOMAIN_KO`](#392-failed-list-of-sales-on-a-specific-domain-request).
+#### Expected responses
 
-/**
- * @mermaid{sales_from_domain}
- */
+[`SALE_FROM_DOMAIN_OK`](#sales_from_domain_success)
 
-```mermaid
-    sequenceDiagram
-    participant Client
-    participant ClientHandler
-    Client->>ClientHandler: SALE_FROM_DOMAIN (domain)
-    alt success
-        ClientHandler->>Client: SALE_FROM_DOMAIN_OK (sales)
-    else failure
-        ClientHandler->>Client: SALE_FRON_DOMAIN_KO (message)
-    end
-```
-## 3. Request from the server to the client
+[`SALE_FROM_DOMAIN_KO`](#sales_from_domain_failure)
 
-### 3.1 Get the public key of the central server
+#### Sequence diagram
+
+@mermaid{sales_from_domain}
+
+[Back to top](#rfc)
+
+## 3. Request from the central server to client {#request_from_server_to_client}
+
+### 3.1 Get the public key of the central server {#get_server_public_key_responses}
 
 ### 3.1.1 Success {#get_server_public_key_success}
 
@@ -235,7 +281,9 @@ The server sends the public key to the client.
 | :-----------------: | :--------: |
 | Server's public key | PublicKey  |
 
-Answer to request [REQUEST_PUBLIC_KEY_OF_CENTRAL_SERVER](#get_server_public_key).
+Answer to request [`REQUEST_PUBLIC_KEY_OF_CENTRAL_SERVER`](#get_server_public_key).
+
+[Back to top](#rfc)
 
 ### 3.1.2 Failure {#get_server_public_key_failure}
 
@@ -252,9 +300,11 @@ Reason of failure:
 | :---------: | :--------: |
 | Message     | String     |
 
-Answer to request [REQUEST_PUBLIC_KEY_OF_CENTRAL_SERVER](#get_server_public_key).
+Answer to request [`REQUEST_PUBLIC_KEY_OF_CENTRAL_SERVER`](#get_server_public_key).
 
-### 3.2 Sign up
+[Back to top](#rfc)
+
+### 3.2 Sign up {#sign_up_responses}
 
 ### 3.2.1 Success {#sign_up_success}
 
@@ -262,14 +312,16 @@ In case of sign up success, the server sends a confirmation of sign up with the 
 
 #### Request
 
-`SIGN_UP_OK(mail, name)`
+`SIGN_UP_OK (mail, name)`
 
 | Variable    | Type       |
 | :---------: | :--------: |
 | mail        | String     |
 | name        | String     |
 
-Answer to request [SIGN_UP](#sign-up).
+Answer to request [`SIGN_UP`](#sign-up).
+
+[Back to top](#rfc)
 
 ### 3.2.2 Failure {#sign_up_failure}
 
@@ -289,9 +341,11 @@ Reason of failures:
 | :---------: | :--------: |
 | message     | String     |
 
-Answer to request [SIGN_UP](#sign_up).
+Answer to request [`SIGN_UP`](#sign_up).
 
-## 3.3 Sign in
+[Back to top](#rfc)
+
+## 3.3 Sign in {#sign_in_responses}
 
 ### 3.3.1 Success {#sign_in_success}
 
@@ -305,7 +359,9 @@ In case of sign in success, the server sends a confirmation of sign in with the 
 | :---------: | :--------: |
 | name        | String     |
 
-Answer to request [SIGN_IN](#sign_in) (clickable link).
+Answer to request [`SIGN_IN`](#sign_in).
+
+[Back to top](#rfc)
 
 ### 3.3.2 Failure {#sign_in_failure}
 
@@ -324,11 +380,13 @@ Reason of failure:
 | :---------: | :--------: |
 | message     | String     |
 
-Answer to request [SIGN_IN](#sign-in) (clickable link).
+Answer to request [`SIGN_IN`](#sign_in).
 
-### 3.4 Sign out
+[Back to top](#rfc)
 
-### 3.4.1 Success
+### 3.4 Sign out {#sign_out_responses}
+
+### 3.4.1 Success {#sign_out_success}
 
 The server send a confirmation of sign out.
 
@@ -336,15 +394,16 @@ The server send a confirmation of sign out.
 
 `SIGN_OUT_OK`
 
-Answer to request [SIGN_OUT](#sign_out) (clickable link).
+Answer to request [`SIGN_OUT`](#sign_out).
 
-### 3.4.2 Failed sign out request
+[Back to top](#rfc)
+
+### 3.4.2 Failure {#sign_out_failure}
 
 The server send an error message to the client.
 
 Reason of failure:
 - the server process the incoming request but don't answer to them.
-
 
 #### Request
 
@@ -354,13 +413,17 @@ Reason of failure:
 | :---------: | :--------: |
 | message     | String     |
 
-Answer to request [SIGN_OUT](#sign-out) (clickable link).
+Answer to request [`SIGN_OUT](#`sign_out).
 
-## 3.5 Create a sale request
+[Back to top](#rfc)
 
-### 3.5.1 Successful create a sale request
+## 3.5 Create a sale {#create_sale_responses}
+
+### 3.5.1 Success {#create_sale_success}
 
 The server send the confirmation of the creation of the sale with the title of the sale.
+
+#### Request
 
 `CREATE_SALE_OK (title)`
 
@@ -368,14 +431,18 @@ The server send the confirmation of the creation of the sale with the title of t
 | :---------: | :--------: |
 | Title       | String     |
 
-Answer to request [`CREATE_SALE`](#25-request-for-create-a-sale) (clickable link).
+Answer to request [`CREATE_SALE`](#create_sale).
 
-### 3.5.2 Failed create a sale request
+[Back to top](#rfc)
+
+### 3.5.2 Failure {#create_sale_failure}
 
 The server send an error message to the client.
 
 Reason of failure:
 - the server process the incoming request but don't answer to them.
+
+#### Request
 
 `CREATE_SALE_KO (message)`
 
@@ -383,24 +450,32 @@ Reason of failure:
 | :---------: | :--------: |
 | Message     | String     |
 
-Answer to request [`CREATE_SALE`](#25-request-for-create-a-sale) (clickable link).
+Answer to request [`CREATE_SALE`](#create_sale).
 
-## 3.6 Update a sale request
+[Back to top](#rfc)
 
-### 3.6.1 Successful update a sale request
+## 3.6 Update a sale {#update_sale_responses}
+
+### 3.6.1 Success {#update_sale_success}
 
 The server send the confirmation of the update of the sale.
 
+#### Request
+
 `UPDATE_SALE_OK`
 
-Answer to request [`UPDATE_SALE`](#26-request-for-update-a-sale) (clickable link).
+Answer to request [`UPDATE_SALE`](#update_sale).
 
-### 3.6.2 Failed update a sale request
+[Back to top](#rfc)
+
+### 3.6.2 Failure {#update_sale_failure}
 
 The server send an error message to the client.
 
 Reason of failure:
 - the server process the incoming request but don't answer to them.
+
+#### Request
 
 `UPDATE_SALE_KO (message)`
 
@@ -408,38 +483,50 @@ Reason of failure:
 | :---------: | :--------: |
 | Message     | String     |
 
-Answer to request [`UPDATE_SALE`](#26-request-for-update-a-sale) (clickable link).
+Answer to request [`UPDATE_SALE`](#update_sale).
 
-## 3.7 Delete a sale request
+[Back to top](#rfc)
 
-### 3.7.1 Successful delete a sale request
+## 3.7 Delete a sale {#delete_sale_responses}
+
+### 3.7.1 Success {#delete_sale_success}
 
 The server send the confirmation of the deletion of the sale.
 
-`REMOVE_SALE_OK`
+#### Request
 
-Answer to request [`REMOVE_SALE`](#27-request-for-delete-a-sale) (clickable link).
+`DELETE_SALE_OK`
 
-### 3.7.2 Failed delete a sale request
+Answer to request [`DELETE_SALE`](#delete_sale).
+
+[Back to top](#rfc)
+
+### 3.7.2 Failure {#delete_sale_failure}
 
 The server send an error message to the client.
 
 Reason of failure:
 - the server process the incoming request but don't answer to them.
 
-`REMOVE_SALE_KO (message)`
+#### Request
+
+`DELETE_SALE_KO (message)`
 
 | Variable    | Type       |
 | :---------: | :--------: |
 | Message     | String     |
 
-Answer to request [`REMOVE_SALE`](#27-request-for-delete-a-sale) (clickable link).
+Answer to request [`DELETE_SALE`](#delete_sale).
 
-## 3.8 List of domain sales request
+[Back to top](#rfc)
 
-### 3.8.1 Successful list of domain sales request
+## 3.8 List of domains {#domains_list_responses}
+
+### 3.8.1 Success {#domains_list_success}
 
 The server send the list of the domains.
+
+#### Request
 
 `DOMAIN_LIST_OK (domains)`
 
@@ -447,11 +534,15 @@ The server send the list of the domains.
 | :---------: | :--------: |
 | domains     | Domains[]  |
 
-Answer to request [`DOMAINS_LIST`](#28-request-for-the-list-of-domain-sales) (clickable link).
+Answer to request [`DOMAINS_LIST`](#domains_list).
 
-### 3.8.2 Failed list of domain sales request
+[Back to top](#rfc)
+
+### 3.8.2 Failure {#domains_list_failure}
 
 The server send an error message to the client.
+
+#### Request
 
 Reason of failure:
 - the server process the incoming request but don't answer to them.
@@ -462,14 +553,17 @@ Reason of failure:
 | :---------: | :--------: |
 | Message     | String     |
 
-Answer to request [`DOMAINS_LIST`](#28-request-for-the-list-of-domain-sales) (clickable link).
+Answer to request [`DOMAINS_LIST`](#domains_list).
 
+[Back to top](#rfc)
 
-## 3.9 List of sales on a specific domain request
+## 3.9 Sales from a domain {#sales_from_domain_responses}
 
-### 3.9.1 Successful list of sales on a specific domain request
+### 3.9.1 Success {#sales_from_domain_success}
 
 The server send the list of the sales on the specific domain.
+
+#### Request
 
 `SALE_FROM_DOMAIN_OK (sales)`
 
@@ -477,11 +571,15 @@ The server send the list of the sales on the specific domain.
 | :---------: | :----------: |
 | sales       | Annonce[]    |
 
-Answer to request [`SALE_FROM_DOMAIN`](#29-request-for-the-sales-on-a-specific-domain) (clickable link).
+Answer to request [`SALE_FROM_DOMAIN`](#sales_from_domain).
 
-### 3.9.2 Failed list of sales on a specific domain request
+[Back to top](#rfc)
+
+### 3.9.2 Failure {#sales_from_domain_failure}
 
 The server send an error message to the client.
+
+#### Request
 
 Reason of failure:
 - the server process the incoming request but don't answer to them.
@@ -492,19 +590,14 @@ Reason of failure:
 | :---------: | :--------: |
 | Message     | String     |
 
-Answer to request [`SALE_FROM_DOMAIN`](#29-request-for-the-sales-on-a-specific-domain) (clickable link).
+Answer to request [`SALE_FROM_DOMAIN`](#sales_from_domain).
 
-## 4. Serialization of the requests
+[Back to top](#rfc)
 
-The following diagram shows the serialization of a request. It holds zhen the request is encrypted, that is everytime except for the request `REQUEST_PUBLIC_KEY_OF_CENTRAL_SERVER` and their associated responses `REQUEST_PUBLIC_KEY_OF_CENTRAL_SERVER_OK` and `REQUEST_PUBLIC_KEY_OF_CENTRAL_SERVER_KO`.
+## 4. Serialization and deserialization of the requests {#serialization_deserialization}
 
-```mermaid
-sequenceDiagram
-    note over Client: Creation of a request R
-    note over Client: Generation of the initialization vector IV
-    participant Client
-    participant ClientHandler
-    Client->>ClientHandler: (bytesArray(IV).length + bytesArray(R).length, bytesArray(IV), bytesArray(R))
-    Note over ClientHandler: Extract the initialization vector IV
-    Note over ClientHandler: Retrieve the request R
-```
+The following diagram shows the serialization and deseriialization of a request. It holds when the request is encrypted, that is everytime except for the request `REQUEST_PUBLIC_KEY_OF_CENTRAL_SERVER` and their associated responses `REQUEST_PUBLIC_KEY_OF_CENTRAL_SERVER_OK` and `REQUEST_PUBLIC_KEY_OF_CENTRAL_SERVER_KO`.
+
+@mermaid{request_serialisation_deserialization}
+
+[Back to top](#rfc)
