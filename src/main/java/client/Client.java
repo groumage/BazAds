@@ -78,7 +78,7 @@ import protocol.RequestDeserializer;
  * 
  * @section rfc 2. RFC
  * 
- * The RFC of the project is available at the following link: <a href="https://groumage.github.io/PetitesAnnonces/Doxygen/rfc_top   .html">RFC</a>
+ * The RFC of the project is available at the following link: <a href="https://groumage.github.io/PetitesAnnonces/Doxygen/rfc_top.html">RFC</a>
  * 
  * @section next_steps 3. Next steps
  * 
@@ -107,7 +107,7 @@ public class Client implements Runnable, ClientSendRequestsToCentralServer, Clie
     private ProtocolCommand lastProcessedCommand;
     private JFrame frame;
     private GraphicalUI gui;
-    private Sale[] annonces;
+    private Sale[] sales;
     private Domain[] domains;
     private HashMap<String, String> messages;
     private DatagramSocket serverUDP;
@@ -301,16 +301,16 @@ public class Client implements Runnable, ClientSendRequestsToCentralServer, Clie
             case SIGN_IN_KO -> this.signInKo(inRequest);
             case SIGN_OUT_OK -> this.signOutOk();
             case SIGN_OUT_KO -> this.signOutKo();
-            case CREATE_SALE_OK -> this.createAnnonceOk(inRequest);
-            case CREATE_SALE_KO -> this.createAnnonceKo(inRequest);
+            case CREATE_SALE_OK -> this.createSaleOk(inRequest);
+            case CREATE_SALE_KO -> this.createSaleKo(inRequest);
             case UPDATE_SALE_OK -> this.updateAnonceOk(inRequest);
             case UPDATE_SALE_KO -> this.updateAnonceKo(inRequest);
             case DOMAINS_LIST_OK -> this.domainListOk(inRequest);
             case DOMAINS_LIST_KO -> this.domainListKo(inRequest);
-            case SALES_FROM_DOMAIN_OK -> this.annonceFromDomainOk(inRequest);
-            case SALES_FROM_DOMAIN_KO -> this.annonceFromDomainKo(inRequest);
-            case DELETE_SALE_OK -> this.removeAnnonceOk(inRequest);
-            case DELETE_SALE_KO -> this.removeAnnonceKo(inRequest);
+            case SALES_FROM_DOMAIN_OK -> this.salesFromDomainOk(inRequest);
+            case SALES_FROM_DOMAIN_KO -> this.salesFromDomainKo(inRequest);
+            case DELETE_SALE_OK -> this.deleteSaleOk(inRequest);
+            case DELETE_SALE_KO -> this.deleteSaleKo(inRequest);
             case UDP_SERVER_OK -> this.udpServerOk(inRequest);
             case UDP_SERVER_KO -> this.udpServerKo(inRequest);
             default -> throw new UnsupportedOperationException("Unimplemented case");
@@ -467,7 +467,7 @@ public class Client implements Runnable, ClientSendRequestsToCentralServer, Clie
      * @brief Create a request to update a sale.
      */
     @Override
-    public void updateAnnonce(String title, String descriptif, int price, int id) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, IOException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+    public void updateSale(String title, String descriptif, int price, int id) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, IOException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         this.sendRequestCentralServer(new Request(ProtocolCommand.UPDATE_SALE, title, descriptif, price, id));
     }
 
@@ -475,7 +475,7 @@ public class Client implements Runnable, ClientSendRequestsToCentralServer, Clie
      * @brief Create a request to remove a sale.
      */
     @Override
-    public void removeAnnonce(int id) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, IOException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+    public void deleteSale(int id) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, IOException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         this.sendRequestCentralServer(new Request(ProtocolCommand.DELETE_SALE, id));
     }
     
@@ -605,16 +605,16 @@ public class Client implements Runnable, ClientSendRequestsToCentralServer, Clie
      * @brief Process the successfull creation of a sale.
      */
     @Override
-    public void createAnnonceOk(Request req) {
-        this.printMessageToLoggerAndClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_ANNONCE_CREATED_OK, req.getParams().get("Title")).toString());
+    public void createSaleOk(Request req) {
+        this.printMessageToLoggerAndClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SALE_CREATED_OK, req.getParams().get("Title")).toString());
     }
 
     /*
      * @brief Process the Failed to creation of a sale.
      */
     @Override
-    public void createAnnonceKo(Request req) {
-        this.printMessageToLoggerAndClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_ANNONCE_CREATED_KO, req.getParams().get("Error")).toString());
+    public void createSaleKo(Request req) {
+        this.printMessageToLoggerAndClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SALE_CREATED_KO, req.getParams().get("Error")).toString());
     }
 
     /*
@@ -622,7 +622,7 @@ public class Client implements Runnable, ClientSendRequestsToCentralServer, Clie
      */
     @Override
     public void updateAnonceOk(Request req) {
-        this.printMessageToLoggerAndClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_ANNONCE_UPDATED_OK).toString());
+        this.printMessageToLoggerAndClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SALE_UPDATED_OK).toString());
     }
 
     /*
@@ -630,7 +630,7 @@ public class Client implements Runnable, ClientSendRequestsToCentralServer, Clie
      */
     @Override
     public void updateAnonceKo(Request req) {
-        this.printMessageToLoggerAndClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_ANNONCE_UPDATED_KO, req.getParams().get("Error")).toString());
+        this.printMessageToLoggerAndClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SALE_UPDATED_KO, req.getParams().get("Error")).toString());
     }
 
     /*
@@ -654,9 +654,9 @@ public class Client implements Runnable, ClientSendRequestsToCentralServer, Clie
      * @brief Process the successfull request to get the sales from a domain.
      */
     @Override
-    public void annonceFromDomainOk(Request req) {
-        this.printMessageToLoggerAndClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_ANNONCE_FROM_DOMAIN_OK, Arrays.toString((Sale[]) req.getParams().get("AnnoncesFromDomain"))).toString());
-        this.annonces = (Sale[]) req.getParams().get("AnnoncesFromDomain");
+    public void salesFromDomainOk(Request req) {
+        this.printMessageToLoggerAndClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SALES_FROM_DOMAIN_OK, Arrays.toString((Sale[]) req.getParams().get("AnnoncesFromDomain"))).toString());
+        this.sales = (Sale[]) req.getParams().get("AnnoncesFromDomain");
         this.gui.updateAnnonceList();
     }
 
@@ -664,9 +664,9 @@ public class Client implements Runnable, ClientSendRequestsToCentralServer, Clie
      * @brief Process the Failed to request to get the sales from a domain.
      */
     @Override
-    public void annonceFromDomainKo(Request req) {
-        this.printMessageToLoggerAndClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_ANNONCE_FROM_DOMAIN_KO, req.getParams().get("Error")).toString());
-        this.annonces = new Sale[]{}; // empty the list of annonces
+    public void salesFromDomainKo(Request req) {
+        this.printMessageToLoggerAndClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SALES_FROM_DOMAIN_KO, req.getParams().get("Error")).toString());
+        this.sales = new Sale[]{}; // empty the list of annonces
         this.gui.updateAnnonceList();
     }
 
@@ -674,16 +674,16 @@ public class Client implements Runnable, ClientSendRequestsToCentralServer, Clie
      * @brief Process the successfull request to remove a sale.
      */
     @Override
-    public void removeAnnonceOk(Request req) {
-        this.printMessageToLoggerAndClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_REMOVE_ANNONCE_OK).toString());
+    public void deleteSaleOk(Request req) {
+        this.printMessageToLoggerAndClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_DELETE_SALE_OK).toString());
     }
 
     /*
      * @brief Process the Failed to request to remove a sale.
      */
     @Override
-    public void removeAnnonceKo(Request req) {
-        this.printMessageToLoggerAndClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_REMOVE_ANNONCE_KO, req.getParams().get("Error")).toString());
+    public void deleteSaleKo(Request req) {
+        this.printMessageToLoggerAndClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_DELETE_SALE_KO, req.getParams().get("Error")).toString());
     }
 
     @Override
@@ -746,8 +746,8 @@ public class Client implements Runnable, ClientSendRequestsToCentralServer, Clie
         return this.gui;
     }
 
-    public Sale[] getAnnonces() {
-        return this.annonces;
+    public Sale[] getSales() {
+        return this.sales;
     }
     
     public PublicKey getPublicKey() {
