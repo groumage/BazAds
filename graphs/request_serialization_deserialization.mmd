@@ -1,0 +1,8 @@
+sequenceDiagram
+note over Client: Creation of a request R
+note over Client: Generation of the initialization vector IV
+participant Client
+participant ClientHandler
+Client->>ClientHandler: (bytesArray(IV).length + bytesArray(R).length, bytesArray(IV), bytesArray(R))
+Note over ClientHandler: Extract the initialization vector IV
+Note over ClientHandler: Retrieve the request R
