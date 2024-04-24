@@ -1,4 +1,4 @@
-# RFC {#rfc}
+# RFC {#rfc_top}
 
 ## 1. Introduction and table of contents {#introduction_rfc}
 
@@ -69,7 +69,7 @@ All exchanges between a client and the central server are encrypted. To that end
 
 @mermaid{request_public_key_of_central_server}
 
-[Back to top](#rfc)
+[Back to top](#rfc_top)
 
 ### 2.2 Sign up {#sign_up}
 
@@ -95,7 +95,7 @@ A client requests to sign up by sending its mail, name and password.
 
 @mermaid{sign_up}
 
-[Back to top](#rfc)
+[Back to top](#rfc_top)
 
 ### 2.3 Sign in {#sign_in}
 
@@ -121,7 +121,7 @@ A client requests to sign in by its mail and password to sign in. In addition, i
 
 @mermaid{sign_in}
 
-[Back to top](#rfc)
+[Back to top](#rfc_top)
 
 ### 2.4 Sign out {#sign_out}
 
@@ -141,7 +141,7 @@ A client just have to notify the server that he signs out.
 
 @mermaid{sign_out}
 
-[Back to top](#rfc)
+[Back to top](#rfc_top)
 
 ### 2.5 Create a sale {#create_sale}
 
@@ -168,7 +168,7 @@ A client has to send the domain, the name, the content and the price for the new
 
 @mermaid{create_sale}
 
-[Back to top](#rfc)
+[Back to top](#rfc_top)
 
 ### 2.6 Update a sale {#update_sale}
 
@@ -195,7 +195,7 @@ A client has to send the new title, the new content, the new price of the sale a
 
 @mermaid{update_sale}
 
-[Back to top](#rfc)
+[Back to top](#rfc_top)
 
 ### 2.7 Delete a sale {#delete_sale}
 
@@ -219,7 +219,7 @@ A client has to send the id of the sale he wants to delete. A client can delete 
 
 @mermaid{delete_sale}
 
-[Back to top](#rfc)
+[Back to top](#rfc_top)
 
 ### 2.8 List of domains {#domains_list}
 
@@ -239,7 +239,7 @@ A client just have to notify the server to the server that he wants the list of 
 
 @mermaid{domains_list}
 
-[Back to top](#rfc)
+[Back to top](#rfc_top)
 
 ### 2.9 Sales from a domain {#sales_from_domain}
 
@@ -263,7 +263,7 @@ A client has to send the domains from which he wants to retrieve the sales.
 
 @mermaid{sales_from_domain}
 
-[Back to top](#rfc)
+[Back to top](#rfc_top)
 
 ## 3. Request from the central server to client {#request_from_server_to_client}
 
@@ -283,7 +283,7 @@ The server sends the public key to the client.
 
 Answer to request [`REQUEST_PUBLIC_KEY_OF_CENTRAL_SERVER`](#get_server_public_key).
 
-[Back to top](#rfc)
+[Back to top](#rfc_top)
 
 ### 3.1.2 Failure {#get_server_public_key_failure}
 
@@ -302,7 +302,7 @@ Reason of failure:
 
 Answer to request [`REQUEST_PUBLIC_KEY_OF_CENTRAL_SERVER`](#get_server_public_key).
 
-[Back to top](#rfc)
+[Back to top](#rfc_top)
 
 ### 3.2 Sign up {#sign_up_responses}
 
@@ -321,7 +321,7 @@ In case of sign up success, the server sends a confirmation of sign up with the 
 
 Answer to request [`SIGN_UP`](#sign-up).
 
-[Back to top](#rfc)
+[Back to top](#rfc_top)
 
 ### 3.2.2 Failure {#sign_up_failure}
 
@@ -343,7 +343,7 @@ Reason of failures:
 
 Answer to request [`SIGN_UP`](#sign_up).
 
-[Back to top](#rfc)
+[Back to top](#rfc_top)
 
 ## 3.3 Sign in {#sign_in_responses}
 
@@ -361,7 +361,7 @@ In case of sign in success, the server sends a confirmation of sign in with the 
 
 Answer to request [`SIGN_IN`](#sign_in).
 
-[Back to top](#rfc)
+[Back to top](#rfc_top)
 
 ### 3.3.2 Failure {#sign_in_failure}
 
@@ -382,7 +382,7 @@ Reason of failure:
 
 Answer to request [`SIGN_IN`](#sign_in).
 
-[Back to top](#rfc)
+[Back to top](#rfc_top)
 
 ### 3.4 Sign out {#sign_out_responses}
 
@@ -396,7 +396,7 @@ The server send a confirmation of sign out.
 
 Answer to request [`SIGN_OUT`](#sign_out).
 
-[Back to top](#rfc)
+[Back to top](#rfc_top)
 
 ### 3.4.2 Failure {#sign_out_failure}
 
@@ -415,7 +415,7 @@ Reason of failure:
 
 Answer to request [`SIGN_OUT](#`sign_out).
 
-[Back to top](#rfc)
+[Back to top](#rfc_top)
 
 ## 3.5 Create a sale {#create_sale_responses}
 
@@ -433,7 +433,7 @@ The server send the confirmation of the creation of the sale with the title of t
 
 Answer to request [`CREATE_SALE`](#create_sale).
 
-[Back to top](#rfc)
+[Back to top](#rfc_top)
 
 ### 3.5.2 Failure {#create_sale_failure}
 
@@ -452,7 +452,7 @@ Reason of failure:
 
 Answer to request [`CREATE_SALE`](#create_sale).
 
-[Back to top](#rfc)
+[Back to top](#rfc_top)
 
 ## 3.6 Update a sale {#update_sale_responses}
 
@@ -466,7 +466,7 @@ The server send the confirmation of the update of the sale.
 
 Answer to request [`UPDATE_SALE`](#update_sale).
 
-[Back to top](#rfc)
+[Back to top](#rfc_top)
 
 ### 3.6.2 Failure {#update_sale_failure}
 
@@ -485,7 +485,7 @@ Reason of failure:
 
 Answer to request [`UPDATE_SALE`](#update_sale).
 
-[Back to top](#rfc)
+[Back to top](#rfc_top)
 
 ## 3.7 Delete a sale {#delete_sale_responses}
 
@@ -499,7 +499,7 @@ The server send the confirmation of the deletion of the sale.
 
 Answer to request [`DELETE_SALE`](#delete_sale).
 
-[Back to top](#rfc)
+[Back to top](#rfc_top)
 
 ### 3.7.2 Failure {#delete_sale_failure}
 
@@ -518,7 +518,7 @@ Reason of failure:
 
 Answer to request [`DELETE_SALE`](#delete_sale).
 
-[Back to top](#rfc)
+[Back to top](#rfc_top)
 
 ## 3.8 List of domains {#domains_list_responses}
 
@@ -536,7 +536,7 @@ The server send the list of the domains.
 
 Answer to request [`DOMAINS_LIST`](#domains_list).
 
-[Back to top](#rfc)
+[Back to top](#rfc_top)
 
 ### 3.8.2 Failure {#domains_list_failure}
 
@@ -555,7 +555,7 @@ Reason of failure:
 
 Answer to request [`DOMAINS_LIST`](#domains_list).
 
-[Back to top](#rfc)
+[Back to top](#rfc_top)
 
 ## 3.9 Sales from a domain {#sales_from_domain_responses}
 
@@ -573,7 +573,7 @@ The server send the list of the sales on the specific domain.
 
 Answer to request [`SALE_FROM_DOMAIN`](#sales_from_domain).
 
-[Back to top](#rfc)
+[Back to top](#rfc_top)
 
 ### 3.9.2 Failure {#sales_from_domain_failure}
 
@@ -592,7 +592,7 @@ Reason of failure:
 
 Answer to request [`SALE_FROM_DOMAIN`](#sales_from_domain).
 
-[Back to top](#rfc)
+[Back to top](#rfc_top)
 
 ## 4. Serialization and deserialization of the requests {#serialization_deserialization}
 
@@ -600,4 +600,4 @@ The following diagram shows the serialization and deseriialization of a request.
 
 @mermaid{request_serialization_deserialization}
 
-[Back to top](#rfc)
+[Back to top](#rfc_top)
