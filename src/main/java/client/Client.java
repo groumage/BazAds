@@ -87,7 +87,7 @@ import protocol.RequestDeserializer;
  */
 
 /**
- * @brief Client class.
+ * @brief This class centralizes the client functionalities: sending requests to the central server and processing the responses.
  */
 public class Client implements Runnable, ClientSendRequestsToCentralServer, ClientProcessRequestsFromCentralServer {
     private static final boolean TEST = true;
@@ -114,14 +114,6 @@ public class Client implements Runnable, ClientSendRequestsToCentralServer, Clie
     private DatagramSocket serverUDP;
     private HashMap <String, IpAddressUDPServer> ipAddressesOfOtherUDPServers;
 
-    /**
-     * @brief Initialize all attributes of a Client. Generate also its the public and private key pair.
-     * 
-     * @param mail The mail of the client.
-     * @param name The name of the client.
-     * @param visibleFrame A boolean to set the visibility of the client application.
-     * @param UDPServer A boolean to set if the client has an UDP server.
-     */
     public Client(String mail, String name, boolean visibleFrame, boolean hasUDPServer) throws NoSuchAlgorithmException, IOException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException, InterruptedException {
         this.logger = Logger.getLogger("LogClient_" + mail);
         FileHandler fileHandler = new FileHandler("LogClient_" + mail + ".log");
@@ -146,9 +138,9 @@ public class Client implements Runnable, ClientSendRequestsToCentralServer, Clie
     }
 
     /**
-     * @brief Open the socket from the clients to the central server that store and manage the sales.
+     * @brief Open the socket from the clients to a local central server that store and manage the sales.
      * 
-     * Default address is 127.0.0.1 and port is 1234.
+     * Default address is 127.0.0.1 and port is 4321.
      */
     public void openSocketToCentralServer() throws IOException {
         try {
@@ -167,7 +159,7 @@ public class Client implements Runnable, ClientSendRequestsToCentralServer, Clie
             this.receiverFromCentralServer = new Thread(() -> {
                 while (!this.stopReceiveFromCentralServer) {
                     try {
-                        Request request = receiveRequestCentralServer();
+                        Request request = deserializeRequest();
                         if (request == null) {
                             this.stopReceiveFromCentralServer = true;
                             continue;
@@ -186,9 +178,6 @@ public class Client implements Runnable, ClientSendRequestsToCentralServer, Clie
         }
     }
     
-    /**
-     * @brief Close the socket to the central server.
-     */
     public void closeSocketToCentralServer() throws IOException, NoSuchAlgorithmException {
         if (this.socket != null) {
             this.sharedSecret = null;
@@ -204,10 +193,7 @@ public class Client implements Runnable, ClientSendRequestsToCentralServer, Clie
         }
     }
 
-    /**
-     * @brief Read and deserialize a byte array (received from the central server) into a request object.
-     */
-    private Request receiveRequestCentralServer() throws IOException, ClassNotFoundException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+    private Request deserializeRequest() throws IOException, ClassNotFoundException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         int inRequestBytesLength = this.dis.readInt();
         byte[] inRequestBytes = this.dis.readNBytes(inRequestBytesLength);
         String requestString = new String(inRequestBytes);
@@ -226,10 +212,7 @@ public class Client implements Runnable, ClientSendRequestsToCentralServer, Clie
         return inRequest;
     }
 
-    /**
-     * @brief Serialize a request object into a byte array and send it to the central server.
-     */
-    private void sendRequestCentralServer(Request outRequest) throws IOException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+    private void serializeRequest(Request outRequest) throws IOException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         if (this.socket == null)
             this.openSocketToCentralServer();
         else {
@@ -249,10 +232,7 @@ public class Client implements Runnable, ClientSendRequestsToCentralServer, Clie
         }
     }
     
-    /** 
-     * @brief Read and deserialize a byte array (received on the UDP server of the client) into a request object.
-     */
-    private Request receiveUDPRequest() throws IOException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+    private Request deserializeRequestUDP() throws IOException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         byte[] inRequestBytes = new byte[1024];
         DatagramPacket inRequestDatagram = new DatagramPacket(inRequestBytes, inRequestBytes.length);
         this.serverUDP.receive(inRequestDatagram);
@@ -271,10 +251,7 @@ public class Client implements Runnable, ClientSendRequestsToCentralServer, Clie
         return inRequest;
     }
 
-    /*
-     * @brief Serialize a request object into a byte array and send it to the UDP server of another client.
-     */
-    public void sendUDPRequest(String dest, String msg) throws IOException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+    public void serializeRequestUDP(String dest, String msg) throws IOException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         if (!this.ipAddressesOfOtherUDPServers.containsKey(dest)) {
             this.requestUDPCoordinate(dest);
             await().until(() -> this.ipAddressesOfOtherUDPServers.containsKey(dest));
@@ -289,9 +266,6 @@ public class Client implements Runnable, ClientSendRequestsToCentralServer, Clie
         this.serverUDP.send(new DatagramPacket(outRequestEncryptedBytes, outRequestEncryptedBytes.length, InetAddress.getByName(this.ipAddressesOfOtherUDPServers.get(dest).getAddr()), this.ipAddressesOfOtherUDPServers.get(dest).getPort()));
     }
     
-    /**
-     * @brief Call the appropriate method to process a request received from the central server.
-     */
     public void processRequest(Request inRequest) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
         switch (inRequest.getCommand()) {
             case REQUEST_PUBLIC_KEY_OF_CENTRAL_SERVER_KO -> this.requestPublicKeyKo(inRequest);
@@ -319,9 +293,6 @@ public class Client implements Runnable, ClientSendRequestsToCentralServer, Clie
         this.lastProcessedCommand = inRequest.command; // store the last processed command for testing purposes
     }
 
-    /**
-     * @brief Encrypt a string.
-     */
     private String encrypt(String algorithm, String plain, SecretKey key, byte[] initializationVector) throws InvalidAlgorithmParameterException, InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException {
         Cipher cipher = Cipher.getInstance(algorithm);
         cipher.init(Cipher.ENCRYPT_MODE, key, new GCMParameterSpec(128, initializationVector));
@@ -330,9 +301,6 @@ public class Client implements Runnable, ClientSendRequestsToCentralServer, Clie
         return new String(Base64.encodeBase64(cipherText));
     }
 
-    /**
-     * @brief Decrypt a string.
-     */
     private String decrypt(String algorithm, String cipherText, SecretKey key, byte[] initializationVector) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
         Cipher cipher = Cipher.getInstance(algorithm);
         cipher.init(Cipher.DECRYPT_MODE, key, new GCMParameterSpec(128, initializationVector));
@@ -341,18 +309,12 @@ public class Client implements Runnable, ClientSendRequestsToCentralServer, Clie
         return new String(plainText);
     }
 
-    /*
-     * @brief Initialize the public and private key pair.
-     */
     private void initializePrivatePublicKey() throws NoSuchAlgorithmException {
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
         kpg.initialize(256);
         this.publicPrivateKey = kpg.generateKeyPair();
     }
 
-    /**
-     * @brief Perform the key agreement with the public key received from the server.
-     */
     private void performKeyAgreement(Request req) throws InvalidKeySpecException, NoSuchAlgorithmException, InvalidKeyException {
         byte[] otherPublicKeyBytes = (byte[]) req.getParams().get("PublicKey");
         KeyFactory keyFactory = KeyFactory.getInstance("EC");
@@ -373,9 +335,6 @@ public class Client implements Runnable, ClientSendRequestsToCentralServer, Clie
         this.sharedSecret = new SecretKeySpec(factory.generateSecret(spec).getEncoded(), "AES");
     }
 
-    /*
-     * @brief Convert a byte to a hexadecimal string.
-     */
     private String byteToHex(byte b) {
         char[] hexDigits = new char[2];
         hexDigits[0] = Character.forDigit((b >> 4) & 0xF, 16);
@@ -383,9 +342,6 @@ public class Client implements Runnable, ClientSendRequestsToCentralServer, Clie
         return new String(hexDigits);
     }
 
-    /*
-     * @brief Convert a byte array to a hexadecimal string.
-     */
     private String encodeHexString(byte[] byteArray) {
         StringBuilder hexStringBuffer = new StringBuilder();
         for (byte b : byteArray)
@@ -393,9 +349,6 @@ public class Client implements Runnable, ClientSendRequestsToCentralServer, Clie
         return hexStringBuffer.toString();
     }
 
-    /*
-     * @brief Generate random 12 bytes.
-     */
     public byte[] generate12Bytes() throws NoSuchAlgorithmException, IOException {
         if (TEST) {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -423,122 +376,77 @@ public class Client implements Runnable, ClientSendRequestsToCentralServer, Clie
         this.printMessageToClientConsole(msg);
     }
     
-    /*
-     * @brief Create a request to exchange the public key with the central server.
-     */
     @Override
     public void requestPublicKeyOfCentralServer() throws IOException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        this.sendRequestCentralServer(new Request(ProtocolCommand.REQUEST_PUBLIC_KEY_OF_CENTRAL_SERVER, this.publicPrivateKey.getPublic().getEncoded()));
+        this.serializeRequest(new Request(ProtocolCommand.REQUEST_PUBLIC_KEY_OF_CENTRAL_SERVER, this.publicPrivateKey.getPublic().getEncoded()));
     }
 
-    /*
-     * @brief Create a request to sign up.
-     */
     @Override
     public void signUp(String mail, String name, String pwd) throws IOException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        this.sendRequestCentralServer(new Request(ProtocolCommand.SIGN_UP, mail, name, pwd));
+        this.serializeRequest(new Request(ProtocolCommand.SIGN_UP, mail, name, pwd));
     }
 
-    /*
-     * @brief Create a request to sign in.
-     */
     @Override
     public void signIn(String mail, String pwd, boolean sendDomainList) throws IOException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException { 
         this.mail = mail;
-        this.sendRequestCentralServer(new Request(ProtocolCommand.SIGN_IN, mail, pwd, sendDomainList));
+        this.serializeRequest(new Request(ProtocolCommand.SIGN_IN, mail, pwd, sendDomainList));
     }
 
-    /*
-     * @brief Create a request to sign out.
-     */
     @Override
     public void signOut() throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, IOException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        this.sendRequestCentralServer(new Request(ProtocolCommand.SIGN_OUT));
+        this.serializeRequest(new Request(ProtocolCommand.SIGN_OUT));
     }
 
-    /*
-     * @brief Create a request to create a sale.
-     */
     @Override
     public void createSale(Domain dom, String title, String descriptif, int price) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, IOException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        this.sendRequestCentralServer(new Request(ProtocolCommand.CREATE_SALE, dom, title, descriptif, price));
+        this.serializeRequest(new Request(ProtocolCommand.CREATE_SALE, dom, title, descriptif, price));
     }
 
-    /*
-     * @brief Create a request to update a sale.
-     */
     @Override
     public void updateSale(String title, String descriptif, int price, int id) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, IOException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        this.sendRequestCentralServer(new Request(ProtocolCommand.UPDATE_SALE, title, descriptif, price, id));
+        this.serializeRequest(new Request(ProtocolCommand.UPDATE_SALE, title, descriptif, price, id));
     }
 
-    /*
-     * @brief Create a request to remove a sale.
-     */
     @Override
     public void deleteSale(int id) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, IOException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        this.sendRequestCentralServer(new Request(ProtocolCommand.DELETE_SALE, id));
+        this.serializeRequest(new Request(ProtocolCommand.DELETE_SALE, id));
     }
     
-    /*
-     * @brief Create a request to get the domain list.
-     */
     @Override
     public void domainList() throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, IOException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        this.sendRequestCentralServer(new Request(ProtocolCommand.DOMAINS_LIST));
+        this.serializeRequest(new Request(ProtocolCommand.DOMAINS_LIST));
     }
 
-    /*
-     * @brief Create a request to get the sales from a domain.
-     */
     @Override
     public void salesFromDomain(Domain domain) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, IOException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        this.sendRequestCentralServer(new Request(ProtocolCommand.SALES_FROM_DOMAIN, domain));
+        this.serializeRequest(new Request(ProtocolCommand.SALES_FROM_DOMAIN, domain));
     }
 
-    /*
-     * @brief Create a request to get the coordinates of the UDP server of another client.
-     */
     @Override
     public void requestUDPCoordinate(String mail) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, IOException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        this.sendRequestCentralServer(new Request(ProtocolCommand.REQUEST_UDP_COORDINATES, mail));
+        //TODO
     }
 
-    /*
-     * @brief Process the successfull exchange of public key with the central server.
-     */
     @Override
     public void requestPublicKeyOk(Request req) throws InvalidKeySpecException, NoSuchAlgorithmException, InvalidKeyException {
         this.performKeyAgreement(req);
     }  
 
-    /*
-     * @brief Process the Failed to exchange of public key with the central server.
-     */
     @Override
     public void requestPublicKeyKo(Request req) {
         this.printMessageToLoggerAndClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_REQUEST_PUBLIC_KEY_KO, req.getParams().get("Error")).toString());
     }
 
-    /*
-     * @brief Process the successfull sign up.
-     */
     @Override
     public void signUpOk(Request req) {
         this.printMessageToLoggerAndClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SIGN_UP_OK, req.getParams().get("Mail"), req.getParams().get("Name")).toString());
     }
 
-    /*
-     * @brief Process the Failed to sign up.
-     */
     @Override
     public void signUpKo(Request req) {
         this.printMessageToLoggerAndClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SIGN_UP_KO, req.getParams().get("Error")).toString());
     }
 
-    /*
-     * @brief Process the successfull sign in.
-     */
     @Override
     public void signInOk(Request req) throws IOException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         this.name = (String) req.getParams().get("Name");
@@ -553,7 +461,7 @@ public class Client implements Runnable, ClientSendRequestsToCentralServer, Clie
             this.receiverUDPServer = new Thread(() -> {
                 while (!this.stopReceiveFromCentralServer) {
                     try {
-                        Request request = receiveUDPRequest();
+                        Request request = deserializeRequestUDP();
                         processRequest(request);
                     } catch (IOException | InvalidAlgorithmParameterException | NoSuchPaddingException |
                              IllegalBlockSizeException | NoSuchAlgorithmException | BadPaddingException |
@@ -564,7 +472,7 @@ public class Client implements Runnable, ClientSendRequestsToCentralServer, Clie
             });
             this.receiverUDPServer.start();
             Request udpRequest = new Request(ProtocolCommand.UDP_SERVER, InetAddress.getLocalHost().getHostAddress(), this.serverUDP.getLocalPort());
-            this.sendRequestCentralServer(udpRequest);
+            this.serializeRequest(udpRequest);
         }
         this.gui.updateViewGUI(PerspectiveView.LOGGED);
         this.setState(ClientState.LOGGED);
@@ -573,18 +481,12 @@ public class Client implements Runnable, ClientSendRequestsToCentralServer, Clie
         this.printMessageToClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SIGN_IN_OK, this.mail).toString());
     }
 
-    /*
-     * @brief Process the Failed to sign in.
-     */
     @Override
     public void signInKo(Request req) {
         this.mail = "";
         this.printMessageToLoggerAndClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SIGN_IN_KO, req.getParams().get("Error")).toString());
     }
 
-    /*
-     * @brief Process the successfull sign out.
-     */
     @Override
     public void signOutOk() {
         this.mail = "";
@@ -594,66 +496,52 @@ public class Client implements Runnable, ClientSendRequestsToCentralServer, Clie
         this.printMessageToLoggerAndClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SIGN_OUT_OK).toString());
     }
 
-    /*
-     * @brief Process the Failed to sign out.
-     */
     @Override
     public void signOutKo() {
         this.printMessageToLoggerAndClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SIGN_OUT_KO, ErrorLogMessage.NOT_RESPONDING_TO_REQUEST.getContent()).toString());
     }
 
-    /*
-     * @brief Process the successfull creation of a sale.
-     */
     @Override
     public void createSaleOk(Request req) {
         this.printMessageToLoggerAndClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SALE_CREATED_OK, req.getParams().get("Title")).toString());
     }
-
-    /*
-     * @brief Process the Failed to creation of a sale.
-     */
+    
     @Override
     public void createSaleKo(Request req) {
         this.printMessageToLoggerAndClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SALE_CREATED_KO, req.getParams().get("Error")).toString());
     }
-
-    /*
-     * @brief Process the successfull update of a sale.
-     */
+    
     @Override
     public void updateAnonceOk(Request req) {
         this.printMessageToLoggerAndClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SALE_UPDATED_OK).toString());
     }
-
-    /*
-     * @brief Process the Failed to update of a sale.
-     */
+    
     @Override
     public void updateAnonceKo(Request req) {
         this.printMessageToLoggerAndClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SALE_UPDATED_KO, req.getParams().get("Error")).toString());
     }
+    
+    @Override
+    public void deleteSaleOk(Request req) {
+        this.printMessageToLoggerAndClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_DELETE_SALE_OK).toString());
+    }
 
-    /*
-     * @brief Process the succesfull request to get the domain list.
-     */
+    @Override
+    public void deleteSaleKo(Request req) {
+        this.printMessageToLoggerAndClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_DELETE_SALE_KO, req.getParams().get("Error")).toString());
+    }
+
     @Override
     public void domainListOk(Request req) {
         this.printMessageToLoggerAndClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_DOMAIN_LIST_OK, Arrays.toString((Domain[]) req.getParams().get("Domains"))).toString());
         this.gui.setDomainList((Domain[]) req.getParams().get("Domains"));
     }
 
-    /*
-     * @brief Process the Failed to request to get the domain list.
-     */
     @Override
     public void domainListKo(Request req) {
         this.printMessageToLoggerAndClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_DOMAIN_LIST_KO, req.getParams().get("Error")).toString());
     }
 
-    /*
-     * @brief Process the successfull request to get the sales from a domain.
-     */
     @Override
     public void salesFromDomainOk(Request req) {
         this.printMessageToLoggerAndClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SALES_FROM_DOMAIN_OK, Arrays.toString((Sale[]) req.getParams().get("AnnoncesFromDomain"))).toString());
@@ -661,9 +549,6 @@ public class Client implements Runnable, ClientSendRequestsToCentralServer, Clie
         this.gui.updateAnnonceList();
     }
 
-    /*
-     * @brief Process the Failed to request to get the sales from a domain.
-     */
     @Override
     public void salesFromDomainKo(Request req) {
         this.printMessageToLoggerAndClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SALES_FROM_DOMAIN_KO, req.getParams().get("Error")).toString());
@@ -671,35 +556,19 @@ public class Client implements Runnable, ClientSendRequestsToCentralServer, Clie
         this.gui.updateAnnonceList();
     }
 
-    /*
-     * @brief Process the successfull request to remove a sale.
-     */
-    @Override
-    public void deleteSaleOk(Request req) {
-        this.printMessageToLoggerAndClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_DELETE_SALE_OK).toString());
-    }
-
-    /*
-     * @brief Process the Failed to request to remove a sale.
-     */
-    @Override
-    public void deleteSaleKo(Request req) {
-        this.printMessageToLoggerAndClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_DELETE_SALE_KO, req.getParams().get("Error")).toString());
-    }
-
     @Override
     public void udpServerOk(Request req) {
-        this.printMessageToLoggerAndClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_UDP_SERVER_OK).toString());
+        //TODO
     }
 
     @Override
     public void udpServerKo(Request req) {
-        this.printMessageToLoggerAndClientConsole(new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_UDP_SERVER_KO, req.getParams().get("Error")).toString());
+        //TODO
     }
 
     @Override
     public void requestUDPServerOk(Request req) {
-        this.ipAddressesOfOtherUDPServers.put((String) req.getParams().get("Mail"), (IpAddressUDPServer) req.getParams().get("Coord"));
+        //TODO
     }
 
     @Override
@@ -767,9 +636,6 @@ public class Client implements Runnable, ClientSendRequestsToCentralServer, Clie
         return this.domains;
     }
     
-    /**
-     * @brief Get the last processed command for testing purposes.
-     */
     public ProtocolCommand getLastProcessedCommand() {
         return this.lastProcessedCommand;
     }
