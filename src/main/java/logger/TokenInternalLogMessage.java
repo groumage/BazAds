@@ -1,8 +1,5 @@
 package logger;
 
-/**
- * @brief Enum for internal log messages.
- */
 public enum TokenInternalLogMessage {
     CLIENT_LOG_SOCKET_OPEN(),
     CLIENT_LOG_SOCKET_CLOSED(),

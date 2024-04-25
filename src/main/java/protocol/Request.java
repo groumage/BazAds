@@ -8,10 +8,7 @@ import java.util.Map;
 /**
  * @brief This class is used to transmit information and commands between the client and the server.
  *
- * @detais A request has two fields: a command and a map of parameters.
- * The command is an enum that represents the type of request.
- * The map of parameters contains the information needed to execute the command.
- * For each command, a set of parameters is expected.
+ * @details A request contains a command and an array of parameters. The processing of parameters depends on the command.
  */
 public class Request {
 

@@ -87,7 +87,7 @@ import protocol.RequestDeserializer;
  */
 
 /**
- * @brief This class centralizes the client functionalities: sending requests to the central server and processing the responses.
+ * @brief This class centralizes the client functionalities to send requests to the central server and process responses.
  */
 public class Client implements Runnable, ClientSendRequestsToCentralServer, ClientProcessRequestsFromCentralServer {
     private static final boolean TEST = true;

@@ -5,22 +5,43 @@ import com.google.gson.*;
 import logger.ErrorLogMessage;
 import logger.InternalLogMessage;
 import logger.TokenInternalLogMessage;
-import protocol.*;
+import protocol.ProtocolCommand;
+import protocol.Request;
+import protocol.RequestDeserializer;
+import protocol.ServerProcessRequestsFromClient;
 
-import javax.crypto.*;
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.KeyAgreement;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.*;
 import java.net.Socket;
 import java.nio.ByteBuffer;
-import java.security.*;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.KeyFactory;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
+import org.apache.commons.codec.binary.Base64;
 import static java.nio.charset.StandardCharsets.UTF_8;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 
 /**
  * @@brief This class handles the communication between the server and the client.
@@ -336,14 +357,14 @@ public class ClientHandler implements Runnable, ServerProcessRequestsFromClient 
         cipher.init(Cipher.ENCRYPT_MODE, key, new GCMParameterSpec(128, iv));
         cipher.updateAAD("v1".getBytes(UTF_8));
         byte[] cipherText = cipher.doFinal(input.getBytes());
-        return Base64.getEncoder().encodeToString(cipherText);
+        return new String(Base64.encodeBase64(cipherText));
     }
 
     public String decrypt(String algorithm, String cipherText, SecretKey key, byte[] iv) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
         Cipher cipher = Cipher.getInstance(algorithm);
         cipher.init(Cipher.DECRYPT_MODE, key, new GCMParameterSpec(128, iv));
         cipher.updateAAD("v1".getBytes(UTF_8));
-        byte[] plainText = cipher.doFinal(Base64.getDecoder().decode(cipherText));
+        byte[] plainText = cipher.doFinal(java.util.Base64.getDecoder().decode(cipherText));
         return new String(plainText);
     }
 }

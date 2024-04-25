@@ -13,9 +13,7 @@ import server.Sale;
 import java.lang.reflect.Type;
 
 /**
- * @brief This class is used to deserialize a JSON object into a Request object.
- *
- * @details This class used the Gson library to deserialize a JSON object into a Request object.
+ * @brief This class is used to deserialize a JSON object into a Request object using the Gson library.
  */
 public class RequestDeserializer implements JsonDeserializer<Request> {
     @Override
