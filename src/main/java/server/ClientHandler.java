@@ -22,6 +22,11 @@ import java.util.*;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+/**
+ * @@brief This class handles the communication between the server and the client.
+ * 
+ * @details A thread of ClientHandler is created for each client. This thread communicates with the server to process the requests from the client.
+ */
 public class ClientHandler implements Runnable, ServerProcessRequestsFromClient {
     private Socket socket = null;
     private DataInputStream dis = null;
@@ -104,12 +109,10 @@ public class ClientHandler implements Runnable, ServerProcessRequestsFromClient 
             case SIGN_OUT -> this.responseToSignOut(inRequest);
             case CREATE_SALE -> this.responseToCreateSale(inRequest);
             case UPDATE_SALE -> this.responseToUpdateSale(inRequest);
-            case SALES_FROM_DOMAIN -> this.responseAnnonceFromDomain(inRequest);
-            case DOMAINS_LIST -> this.responseToDomainList();
             case DELETE_SALE -> this.responseDeleteSale(inRequest);
-            case UDP_SERVER -> this.responseUDPServerInsertion(inRequest);
-            case REQUEST_UDP_COORDINATES -> this.responseUDPRequestCoordinate(inRequest);
-            default -> System.out.println("error");
+            case SALES_FROM_DOMAIN -> this.responseAnnonceFromDomain(inRequest);
+            case DOMAINS_LIST -> this.responseDomainsList();
+            default -> throw new UnsupportedOperationException("Unimplemented case");
         }
     }
 
@@ -199,7 +202,7 @@ public class ClientHandler implements Runnable, ServerProcessRequestsFromClient 
                 if (this.server.isPasswordValid(mailFromReq, pwdFromReq)) {
                     this.mail = mailFromReq;
                     if (sendDomainList)
-                        this.responseToDomainList();
+                        this.responseDomainsList();
                     // the name is returned
                     outRequest = new Request(ProtocolCommand.SIGN_IN_OK, this.server.getClientFromMail((String) inRequest.getParams().get("Mail")).getName());
                     //request = new Request(ProtocolCommand.DOMAINS_LIST, (Object) this.server.getDomainList());
@@ -263,7 +266,7 @@ public class ClientHandler implements Runnable, ServerProcessRequestsFromClient 
     }
     
     @Override
-    public void responseToDomainList() throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, IOException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+    public void responseDomainsList() throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, IOException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         Request outRequest;
         if (this.server.isRespondingToRequest()) {
             outRequest = new Request(ProtocolCommand.DOMAINS_LIST_OK, new Object[] {this.server.getDomainList()});

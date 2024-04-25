@@ -392,12 +392,12 @@ public class ProtocolTest {
 			new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_DOMAIN_LIST_OK, Arrays.toString(new Domain[] {Domain.HOUSE, Domain.CAR})).toString(),
 			new Request(ProtocolCommand.CREATE_SALE, Domain.HOUSE, title, content, price),
 			new Request(ProtocolCommand.CREATE_SALE_OK, title),
-			new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_ANNONCE_CREATED_OK, title).toString(),
+			new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SALE_CREATED_OK, title).toString(),
         };
         Object[] expectedLogServer = {
 			new InternalLogMessage(TokenInternalLogMessage.SERVER_LOG_CLIENT_HANDLER_CREATED, 0).toString(),
 			new InternalLogMessage(TokenInternalLogMessage.SERVER_LOG_CLIENT_CREATED, "alice@gmail.com", "Alice").toString(),
-			new InternalLogMessage(TokenInternalLogMessage.SERVER_LOG_CREATE_ANNONCE, "alice@gmail.com", title, content, Domain.HOUSE, price, id).toString(),
+			new InternalLogMessage(TokenInternalLogMessage.SERVER_LOG_CREATE_SALE, "alice@gmail.com", title, content, Domain.HOUSE, price, id).toString(),
         };
         assert (new LogParser()).checkLogFile("LogClient_alice@gmail.com.log", expectedLogAlice);
         assert (new LogParser()).checkLogFile("LogServer.log", expectedLogServer);
@@ -443,7 +443,7 @@ public class ProtocolTest {
             new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_DOMAIN_LIST_OK, Arrays.toString(new Domain[]{Domain.HOUSE, Domain.CAR})).toString(),
             new Request(ProtocolCommand.CREATE_SALE, Domain.HOUSE, title, content, price),
             new Request(ProtocolCommand.CREATE_SALE_KO, ErrorLogMessage.NOT_RESPONDING_TO_REQUEST.getContent()),
-            new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_ANNONCE_CREATED_KO, ErrorLogMessage.NOT_RESPONDING_TO_REQUEST.getContent()).toString(),
+            new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SALE_CREATED_KO, ErrorLogMessage.NOT_RESPONDING_TO_REQUEST.getContent()).toString(),
         };
         Object[] expectedLogServer = {
             new InternalLogMessage(TokenInternalLogMessage.SERVER_LOG_CLIENT_HANDLER_CREATED, 0).toString(),
@@ -475,7 +475,7 @@ public class ProtocolTest {
 		await().until(() -> this.alice.getLastProcessedCommand() == ProtocolCommand.SIGN_IN_OK);
         this.alice.createSale(Domain.HOUSE, title, content, price);
         await().until(() -> this.alice.getLastProcessedCommand() == ProtocolCommand.CREATE_SALE_OK);
-        this.alice.updateAnnonce(titleUpdated, contentUpdated, priceUpdated, id);
+        this.alice.updateSale(titleUpdated, contentUpdated, priceUpdated, id);
         await().until(() -> this.alice.getLastProcessedCommand() == ProtocolCommand.UPDATE_SALE_OK);
 
         Object[] expectedLogAlice = {
@@ -493,16 +493,16 @@ public class ProtocolTest {
             new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SIGN_IN_OK, "alice@gmail.com").toString(),
             new Request(ProtocolCommand.CREATE_SALE, Domain.HOUSE, title, content, price),
             new Request(ProtocolCommand.CREATE_SALE_OK, title),
-            new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_ANNONCE_CREATED_OK, title).toString(),
+            new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SALE_CREATED_OK, title).toString(),
             new Request(ProtocolCommand.UPDATE_SALE, titleUpdated, contentUpdated, priceUpdated, id),
             new Request(ProtocolCommand.UPDATE_SALE_OK),
-            new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_ANNONCE_UPDATED_OK).toString(),
+            new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SALE_UPDATED_OK).toString(),
         };
         Object[] expectedLogServer = {
             new InternalLogMessage(TokenInternalLogMessage.SERVER_LOG_CLIENT_HANDLER_CREATED, 0).toString(),
             new InternalLogMessage(TokenInternalLogMessage.SERVER_LOG_CLIENT_CREATED, "alice@gmail.com", "Alice").toString(),
-            new InternalLogMessage(TokenInternalLogMessage.SERVER_LOG_CREATE_ANNONCE, "alice@gmail.com", title, content, Domain.HOUSE, price, id).toString(),
-            new InternalLogMessage(TokenInternalLogMessage.SERVER_LOG_UPDATE_ANNONCE, "alice@gmail.com", titleUpdated, contentUpdated, Domain.HOUSE, priceUpdated, id).toString(),
+            new InternalLogMessage(TokenInternalLogMessage.SERVER_LOG_CREATE_SALE, "alice@gmail.com", title, content, Domain.HOUSE, price, id).toString(),
+            new InternalLogMessage(TokenInternalLogMessage.SERVER_LOG_UPDATE_SALE, "alice@gmail.com", titleUpdated, contentUpdated, Domain.HOUSE, priceUpdated, id).toString(),
         };
         assert (new LogParser()).checkLogFile("LogClient_alice@gmail.com.log", expectedLogAlice);
         assert (new LogParser()).checkLogFile("LogServer.log", expectedLogServer);
@@ -540,10 +540,10 @@ public class ProtocolTest {
 
         this.alice.createSale(Domain.HOUSE, title, content, price);
         await().until(() -> this.alice.getLastProcessedCommand() == ProtocolCommand.CREATE_SALE_OK);
-        this.bob.updateAnnonce(titleUpdated, contentUpdated, priceUpdated, id);
+        this.bob.updateSale(titleUpdated, contentUpdated, priceUpdated, id);
         await().until(() -> this.bob.getLastProcessedCommand() == ProtocolCommand.UPDATE_SALE_KO);
         this.server.setRespondingToRequest(false);
-        this.alice.updateAnnonce(titleUpdated, contentUpdated, priceUpdated, id);
+        this.alice.updateSale(titleUpdated, contentUpdated, priceUpdated, id);
         await().until(() -> this.alice.getLastProcessedCommand() == ProtocolCommand.UPDATE_SALE_KO);
 
         Object[] expectedLogAlice = {
@@ -561,10 +561,10 @@ public class ProtocolTest {
             new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SIGN_IN_OK, "alice@gmail.com").toString(),
             new Request(ProtocolCommand.CREATE_SALE, Domain.HOUSE, title, content, price),
             new Request(ProtocolCommand.CREATE_SALE_OK, title),
-            new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_ANNONCE_CREATED_OK, title).toString(),
+            new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SALE_CREATED_OK, title).toString(),
             new Request(ProtocolCommand.UPDATE_SALE, titleUpdated, contentUpdated, priceUpdated, id),
             new Request(ProtocolCommand.UPDATE_SALE_KO, ErrorLogMessage.NOT_RESPONDING_TO_REQUEST.getContent()),
-            new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_ANNONCE_UPDATED_KO, ErrorLogMessage.NOT_RESPONDING_TO_REQUEST.getContent()).toString(),
+            new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SALE_UPDATED_KO, ErrorLogMessage.NOT_RESPONDING_TO_REQUEST.getContent()).toString(),
         };
         Object[] expectedLogBob = {
             ClientState.DISCONNECTED,
@@ -581,14 +581,14 @@ public class ProtocolTest {
             new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SIGN_IN_OK, "bob@gmail.com").toString(),
             new Request(ProtocolCommand.UPDATE_SALE, titleUpdated, contentUpdated, priceUpdated, id),
             new Request(ProtocolCommand.UPDATE_SALE_KO, ErrorLogMessage.NOT_OWNER.getContent()),
-            new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_ANNONCE_UPDATED_KO, ErrorLogMessage.NOT_OWNER.getContent()).toString(),
+            new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SALE_UPDATED_KO, ErrorLogMessage.NOT_OWNER.getContent()).toString(),
         };
         Object[] expectedLogServer = {
             new InternalLogMessage(TokenInternalLogMessage.SERVER_LOG_CLIENT_HANDLER_CREATED, 0).toString(),
             new InternalLogMessage(TokenInternalLogMessage.SERVER_LOG_CLIENT_CREATED, "alice@gmail.com", "Alice").toString(),
             new InternalLogMessage(TokenInternalLogMessage.SERVER_LOG_CLIENT_HANDLER_CREATED, 1).toString(),
             new InternalLogMessage(TokenInternalLogMessage.SERVER_LOG_CLIENT_CREATED, "bob@gmail.com", "Bob").toString(),
-            new InternalLogMessage(TokenInternalLogMessage.SERVER_LOG_CREATE_ANNONCE, "alice@gmail.com", title, content, Domain.HOUSE, price, id).toString(),
+            new InternalLogMessage(TokenInternalLogMessage.SERVER_LOG_CREATE_SALE, "alice@gmail.com", title, content, Domain.HOUSE, price, id).toString(),
         };
         assert (new LogParser()).checkLogFile("LogClient_alice@gmail.com.log", expectedLogAlice);
         assert (new LogParser()).checkLogFile("LogClient_bob@gmail.com.log", expectedLogBob);
@@ -614,7 +614,7 @@ public class ProtocolTest {
 		await().until(() -> this.alice.getLastProcessedCommand() == ProtocolCommand.SIGN_IN_OK);
         this.alice.createSale(Domain.HOUSE, titlle, content, price);
         await().until(() -> this.alice.getLastProcessedCommand() == ProtocolCommand.CREATE_SALE_OK);
-        this.alice.removeAnnonce(id);
+        this.alice.deleteSale(id);
         await().until(() -> this.alice.getLastProcessedCommand() == ProtocolCommand.DELETE_SALE_OK);
 
         Object[] expectedLogAlice = {
@@ -632,16 +632,16 @@ public class ProtocolTest {
             new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SIGN_IN_OK, "alice@gmail.com").toString(),
             new Request(ProtocolCommand.CREATE_SALE, Domain.HOUSE, titlle, content, price),
             new Request(ProtocolCommand.CREATE_SALE_OK, titlle),
-            new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_ANNONCE_CREATED_OK, titlle).toString(),
+            new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SALE_CREATED_OK, titlle).toString(),
             new Request(ProtocolCommand.DELETE_SALE, id),
             new Request(ProtocolCommand.DELETE_SALE_OK),
-            new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_REMOVE_ANNONCE_OK).toString(),
+            new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_DELETE_SALE_OK).toString(),
         };
         Object[] expectedLogServer = {
             new InternalLogMessage(TokenInternalLogMessage.SERVER_LOG_CLIENT_HANDLER_CREATED, 0).toString(),
             new InternalLogMessage(TokenInternalLogMessage.SERVER_LOG_CLIENT_CREATED, "alice@gmail.com", "Alice").toString(),
-            new InternalLogMessage(TokenInternalLogMessage.SERVER_LOG_CREATE_ANNONCE, "alice@gmail.com", titlle, content, Domain.HOUSE, price, id).toString(),
-            new InternalLogMessage(TokenInternalLogMessage.SERVER_LOG_REMOVE_ANNONCE, "alice@gmail.com", titlle, content, Domain.HOUSE, price, id).toString(),
+            new InternalLogMessage(TokenInternalLogMessage.SERVER_LOG_CREATE_SALE, "alice@gmail.com", titlle, content, Domain.HOUSE, price, id).toString(),
+            new InternalLogMessage(TokenInternalLogMessage.SERVER_LOG_DELETE_SALE, "alice@gmail.com", titlle, content, Domain.HOUSE, price, id).toString(),
         };
         assert (new LogParser()).checkLogFile("LogClient_alice@gmail.com.log", expectedLogAlice);
         assert (new LogParser()).checkLogFile("LogServer.log", expectedLogServer);
@@ -676,10 +676,10 @@ public class ProtocolTest {
 
         this.alice.createSale(Domain.HOUSE, title, content, price);
         await().until(() -> this.alice.getLastProcessedCommand() == ProtocolCommand.CREATE_SALE_OK);
-        this.bob.removeAnnonce(id);
+        this.bob.deleteSale(id);
         await().until(() -> this.bob.getLastProcessedCommand() == ProtocolCommand.DELETE_SALE_KO);
         this.server.setRespondingToRequest(false);
-        this.alice.removeAnnonce(id);
+        this.alice.deleteSale(id);
         await().until(() -> this.alice.getLastProcessedCommand() == ProtocolCommand.DELETE_SALE_KO);
 
         Object[] expectedLogAlice = {
@@ -697,10 +697,10 @@ public class ProtocolTest {
             new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SIGN_IN_OK, "alice@gmail.com").toString(),
             new Request(ProtocolCommand.CREATE_SALE, Domain.HOUSE, title, content, price),
             new Request(ProtocolCommand.CREATE_SALE_OK, title),
-            new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_ANNONCE_CREATED_OK, title).toString(),
+            new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SALE_CREATED_OK, title).toString(),
             new Request(ProtocolCommand.DELETE_SALE, id),
             new Request(ProtocolCommand.DELETE_SALE_KO, ErrorLogMessage.NOT_RESPONDING_TO_REQUEST.getContent()),
-            new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_REMOVE_ANNONCE_KO, ErrorLogMessage.NOT_RESPONDING_TO_REQUEST.getContent()).toString(),
+            new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_DELETE_SALE_KO, ErrorLogMessage.NOT_RESPONDING_TO_REQUEST.getContent()).toString(),
         };
         Object[] expectedLogBob = {
             ClientState.DISCONNECTED,
@@ -717,14 +717,14 @@ public class ProtocolTest {
             new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SIGN_IN_OK, "bob@gmail.com").toString(),
             new Request(ProtocolCommand.DELETE_SALE, id),
             new Request(ProtocolCommand.DELETE_SALE_KO, ErrorLogMessage.NOT_OWNER.getContent()),
-            new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_REMOVE_ANNONCE_KO, ErrorLogMessage.NOT_OWNER.getContent()).toString(),
+            new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_DELETE_SALE_KO, ErrorLogMessage.NOT_OWNER.getContent()).toString(),
         };
         Object[] expectedLogServer = {
             new InternalLogMessage(TokenInternalLogMessage.SERVER_LOG_CLIENT_HANDLER_CREATED, 0).toString(),
             new InternalLogMessage(TokenInternalLogMessage.SERVER_LOG_CLIENT_CREATED, "alice@gmail.com", "Alice").toString(),
             new InternalLogMessage(TokenInternalLogMessage.SERVER_LOG_CLIENT_HANDLER_CREATED, 1).toString(),
             new InternalLogMessage(TokenInternalLogMessage.SERVER_LOG_CLIENT_CREATED, "bob@gmail.com", "Bob").toString(),
-            new InternalLogMessage(TokenInternalLogMessage.SERVER_LOG_CREATE_ANNONCE, "alice@gmail.com", title, content, Domain.HOUSE, price, id).toString(),
+            new InternalLogMessage(TokenInternalLogMessage.SERVER_LOG_CREATE_SALE, "alice@gmail.com", title, content, Domain.HOUSE, price, id).toString(),
         };
         assert (new LogParser()).checkLogFile("LogClient_alice@gmail.com.log", expectedLogAlice);
         assert (new LogParser()).checkLogFile("LogClient_bob@gmail.com.log", expectedLogBob);
@@ -852,15 +852,15 @@ public class ProtocolTest {
             new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_DOMAIN_LIST_OK, Arrays.toString(new Domain[]{Domain.HOUSE, Domain.CAR})).toString(),
             new Request(ProtocolCommand.CREATE_SALE, Domain.HOUSE, title, content, price),
             new Request(ProtocolCommand.CREATE_SALE_OK, title),
-            new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_ANNONCE_CREATED_OK, title).toString(),
+            new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SALE_CREATED_OK, title).toString(),
             new Request(ProtocolCommand.SALES_FROM_DOMAIN, Domain.HOUSE),
             new Request(ProtocolCommand.SALES_FROM_DOMAIN_OK, new Object[] {new Sale[] {new Sale("Alice", Domain.HOUSE, title, content, price, id)}}),
-            new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_ANNONCE_FROM_DOMAIN_OK, Arrays.toString(new Sale[]{new Sale("Alice", Domain.HOUSE, title, content, price, id)})).toString(),
+            new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SALES_FROM_DOMAIN_OK, Arrays.toString(new Sale[]{new Sale("Alice", Domain.HOUSE, title, content, price, id)})).toString(),
         };
         Object[] expectedLogServer = {
             new InternalLogMessage(TokenInternalLogMessage.SERVER_LOG_CLIENT_HANDLER_CREATED, 0).toString(),
             new InternalLogMessage(TokenInternalLogMessage.SERVER_LOG_CLIENT_CREATED, "alice@gmail.com", "Alice").toString(),
-            new InternalLogMessage(TokenInternalLogMessage.SERVER_LOG_CREATE_ANNONCE, "alice@gmail.com", title, content, Domain.HOUSE, price, id).toString(),
+            new InternalLogMessage(TokenInternalLogMessage.SERVER_LOG_CREATE_SALE, "alice@gmail.com", title, content, Domain.HOUSE, price, id).toString(),
         };
         assert (new LogParser()).checkLogFile("LogClient_alice@gmail.com.log", expectedLogAlice);
         assert (new LogParser()).checkLogFile("LogServer.log", expectedLogServer);
@@ -896,10 +896,10 @@ public class ProtocolTest {
                 new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SIGN_IN_OK, "alice@gmail.com").toString(),
                 new Request(ProtocolCommand.SALES_FROM_DOMAIN, Domain.HOUSE),
                 new Request(ProtocolCommand.SALES_FROM_DOMAIN_KO, ErrorLogMessage.NO_SALES_IN_THAT_DOMAIN.getContent()),
-                new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_ANNONCE_FROM_DOMAIN_KO, ErrorLogMessage.NO_SALES_IN_THAT_DOMAIN.getContent()).toString(),
+                new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SALES_FROM_DOMAIN_KO, ErrorLogMessage.NO_SALES_IN_THAT_DOMAIN.getContent()).toString(),
                 new Request(ProtocolCommand.SALES_FROM_DOMAIN, Domain.HOUSE),
                 new Request(ProtocolCommand.SALES_FROM_DOMAIN_KO, ErrorLogMessage.NOT_RESPONDING_TO_REQUEST.getContent()),
-                new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_ANNONCE_FROM_DOMAIN_KO, ErrorLogMessage.NOT_RESPONDING_TO_REQUEST.getContent()).toString(),
+                new InternalLogMessage(TokenInternalLogMessage.CLIENT_LOG_SALES_FROM_DOMAIN_KO, ErrorLogMessage.NOT_RESPONDING_TO_REQUEST.getContent()).toString(),
         };
         Object[] expectedLogServer = {
                 new InternalLogMessage(TokenInternalLogMessage.SERVER_LOG_CLIENT_HANDLER_CREATED, 0).toString(),

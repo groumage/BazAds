@@ -7,12 +7,16 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 
-import client.IpAddressUDPServer;
 import server.Domain;
 import server.Sale;
 
 import java.lang.reflect.Type;
 
+/**
+ * @brief This class is used to deserialize a JSON object into a Request object.
+ *
+ * @details This class used the Gson library to deserialize a JSON object into a Request object.
+ */
 public class RequestDeserializer implements JsonDeserializer<Request> {
     @Override
     public Request deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
@@ -29,6 +33,10 @@ public class RequestDeserializer implements JsonDeserializer<Request> {
                 byte[] publicKey = new Gson().fromJson(hashMap.get("PublicKey"), byte[].class);
                 return new Request(command, new Object[] {publicKey});
             }
+            case REQUEST_PUBLIC_KEY_OF_CENTRAL_SERVER_KO -> {
+                String error = new Gson().fromJson(hashMap.get("Error"), String.class);
+                return new Request(command, error);
+            }
             case SIGN_UP -> {
                 String mail = new Gson().fromJson(hashMap.get("Mail"), String.class);
                 String name = new Gson().fromJson(hashMap.get("Name"), String.class);
@@ -40,6 +48,10 @@ public class RequestDeserializer implements JsonDeserializer<Request> {
                 String name = new Gson().fromJson(hashMap.get("Name"), String.class);
                 return new Request(command, mail, name);
             }
+            case SIGN_UP_KO -> {
+                String error = new Gson().fromJson(hashMap.get("Error"), String.class);
+                return new Request(command, error);
+            }
             case SIGN_IN -> {
                 String mail = new Gson().fromJson(hashMap.get("Mail"), String.class);
                 String pwd = new Gson().fromJson(hashMap.get("Pwd"), String.class);
@@ -50,10 +62,17 @@ public class RequestDeserializer implements JsonDeserializer<Request> {
                 String name = new Gson().fromJson(hashMap.get("Name"), String.class);
                 return new Request(command, name);
             }
-            case SIGN_OUT, SIGN_OUT_OK, UPDATE_SALE_OK, UDP_SERVER_OK -> {
+            case SIGN_IN_KO -> {
+                String error = new Gson().fromJson(hashMap.get("Error"), String.class);
+                return new Request(command, error);
+            }
+            case SIGN_OUT -> {
                 return new Request(command);
             }
-            case SIGN_UP_KO, SIGN_IN_KO, SIGN_OUT_KO, SALES_FROM_DOMAIN_KO, REQUEST_PUBLIC_KEY_OF_CENTRAL_SERVER_KO, CREATE_SALE_KO, UPDATE_SALE_KO, DOMAINS_LIST_KO, DELETE_SALE_KO, REQUEST_UDP_COORDINATES_KO -> {
+            case SIGN_OUT_OK -> {
+                return new Request(command);
+            }
+            case SIGN_OUT_KO -> {
                 String error = new Gson().fromJson(hashMap.get("Error"), String.class);
                 return new Request(command, error);
             }
@@ -68,6 +87,10 @@ public class RequestDeserializer implements JsonDeserializer<Request> {
                 String title = new Gson().fromJson(hashMap.get("Title"), String.class);
                 return new Request(command, title);
             }
+            case CREATE_SALE_KO -> {
+                String error = new Gson().fromJson(hashMap.get("Error"), String.class);
+                return new Request(command, error);
+            }
             case UPDATE_SALE -> {
                 String title = new Gson().fromJson(hashMap.get("Title"), String.class);
                 String descriptif = new Gson().fromJson(hashMap.get("Descriptif"), String.class);
@@ -75,13 +98,35 @@ public class RequestDeserializer implements JsonDeserializer<Request> {
                 int id = new Gson().fromJson(hashMap.get("Id"), int.class);
                 return new Request(command, title, descriptif, price, id);
             }
+            case UPDATE_SALE_OK -> {
+                return new Request(command);
+            }
+            case UPDATE_SALE_KO -> {
+                String error = new Gson().fromJson(hashMap.get("Error"), String.class);
+                return new Request(command, error);
+            }
+            case DELETE_SALE -> {
+                int id = new Gson().fromJson(hashMap.get("Id"), int.class);
+                return new Request(ProtocolCommand.DELETE_SALE, id);
+            }
             case DELETE_SALE_OK -> {
                 String title = new Gson().fromJson(hashMap.get("Title"), String.class);
                 return new Request(command, title);
             }
+            case DELETE_SALE_KO -> {
+                String error = new Gson().fromJson(hashMap.get("Error"), String.class);
+                return new Request(command, error);
+            }
+            case DOMAINS_LIST -> {
+                return new Request(ProtocolCommand.DOMAINS_LIST);
+            }
             case DOMAINS_LIST_OK -> {
                 Domain[] domains = new Gson().fromJson(hashMap.get("Domains"), Domain[].class);
                 return new Request(command, (Object) domains);
+            }
+            case DOMAINS_LIST_KO -> {
+                String error = new Gson().fromJson(hashMap.get("Error"), String.class);
+                return new Request(command, error);
             }
             case SALES_FROM_DOMAIN -> {
                 Domain dom = new Gson().fromJson(hashMap.get("Domain"), Domain.class);
@@ -91,30 +136,11 @@ public class RequestDeserializer implements JsonDeserializer<Request> {
                 Sale[] annonces = new Gson().fromJson(hashMap.get("AnnoncesFromDomain"), Sale[].class);
                 return new Request(command, (Object) annonces);
             }
-            case DOMAINS_LIST -> {
-                return new Request(ProtocolCommand.DOMAINS_LIST);
+            case SALES_FROM_DOMAIN_KO -> {
+                String error = new Gson().fromJson(hashMap.get("Error"), String.class);
+                return new Request(command, error);
             }
-            case DELETE_SALE -> {
-                int id = new Gson().fromJson(hashMap.get("Id"), int.class);
-                return new Request(ProtocolCommand.DELETE_SALE, id);
-            }
-            case UDP_SERVER -> {
-                String address = new Gson().fromJson(hashMap.get("Address"), String.class);
-                int port = new Gson().fromJson(hashMap.get("Port"), int.class);
-                return new Request(ProtocolCommand.UDP_SERVER, address, port);
-            }
-            case REQUEST_UDP_COORDINATES -> {
-                String mail = new Gson().fromJson(hashMap.get("Mail"), String.class);
-                return new Request(ProtocolCommand.REQUEST_UDP_COORDINATES, mail);
-            }
-            case REQUEST_UDP_COORDINATES_OK -> {
-                String mail = new Gson().fromJson(hashMap.get("Mail"), String.class);
-                IpAddressUDPServer coord = new Gson().fromJson(hashMap.get("Coord"), IpAddressUDPServer.class);
-                return new Request(ProtocolCommand.REQUEST_UDP_COORDINATES_OK, mail, coord);
-            }
-            default -> {
-                return null;
-            }
+            default -> throw new UnsupportedOperationException("Unimplemented case");
         }
     }
 }

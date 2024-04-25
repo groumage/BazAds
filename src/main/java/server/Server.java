@@ -34,7 +34,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * @breif Server class.
+ * @brief This class manages the sales. It is responsible for creating, updating, and deleting sales.
+ * 
+ * @details The sales manipulations are transmitted to the server via the ClientHandler class.
+ * The passwords are stored in a hashed form.
+ * The server can be initialized with some data for testing purposes.
  */
 public class Server implements Runnable {
     private int clientHandlerId = 0;
@@ -164,7 +168,7 @@ public class Server implements Runnable {
     public synchronized void addSale(String mail, Domain domain, String title, String content, int price) {
         Sale newSale = new Sale(mail, domain, title, content, price, this.annonceId);
         this.sales.add(newSale);
-        this.logger.info(new InternalLogMessage(TokenInternalLogMessage.SERVER_LOG_CREATE_ANNONCE, mail, title, content, domain, price, this.annonceId).toString());
+        this.logger.info(new InternalLogMessage(TokenInternalLogMessage.SERVER_LOG_CREATE_SALE, mail, title, content, domain, price, this.annonceId).toString());
         this.annonceId++;
     }
 
@@ -174,7 +178,7 @@ public class Server implements Runnable {
                 sale.setTitle(title);
                 sale.setDescriptif(descriptif);
                 sale.setPrice(price);
-                this.logger.info(new InternalLogMessage(TokenInternalLogMessage.SERVER_LOG_UPDATE_ANNONCE, sale.getOwner(), sale.getTitle(), sale.getContent(), sale.getDomain(), sale.getPrice(), sale.getId()).toString());
+                this.logger.info(new InternalLogMessage(TokenInternalLogMessage.SERVER_LOG_UPDATE_SALE, sale.getOwner(), sale.getTitle(), sale.getContent(), sale.getDomain(), sale.getPrice(), sale.getId()).toString());
                 break;
             }
     }
@@ -187,7 +191,7 @@ public class Server implements Runnable {
      public synchronized void deleteSale(int id) {
         for (Sale a: this.sales)
             if (a.getId() == id)
-                this.logger.info(new InternalLogMessage(TokenInternalLogMessage.SERVER_LOG_REMOVE_ANNONCE, a.getOwner(), a.getTitle(), a.getContent(), a.getDomain(), a.getPrice(), a.getId()).toString());
+                this.logger.info(new InternalLogMessage(TokenInternalLogMessage.SERVER_LOG_DELETE_SALE, a.getOwner(), a.getTitle(), a.getContent(), a.getDomain(), a.getPrice(), a.getId()).toString());
         this.sales.removeIf(a -> a.getId() == id);
     }
 

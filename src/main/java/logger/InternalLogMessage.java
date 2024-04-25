@@ -52,32 +52,32 @@ public class InternalLogMessage {
             case SERVER_LOG_CLIENT_HANDLER -> {
                 return "[INTERNAL] Close client handler: (id=\"" + this.content[0] + "\")";
             }
-            case CLIENT_LOG_ANNONCE_CREATED_OK -> {
-                return "[INTERNAL] Annonce created: (title=\"" + this.content[0] + "\")";
+            case CLIENT_LOG_SALE_CREATED_OK -> {
+                return "[INTERNAL] Sale created: (title=\"" + this.content[0] + "\")";
             }
-            case CLIENT_LOG_ANNONCE_CREATED_KO -> {
-                return "[INTERNAL] Annonce not created: (error=\"" + this.content[0] + "\")";
+            case CLIENT_LOG_SALE_CREATED_KO -> {
+                return "[INTERNAL] Sale not created: (error=\"" + this.content[0] + "\")";
             }
-            case CLIENT_LOG_ANNONCE_UPDATED_OK -> {
-                return "[INTERNAL] Annonce has been updated";
+            case CLIENT_LOG_SALE_UPDATED_OK -> {
+                return "[INTERNAL] Sale has been updated";
             }
-            case CLIENT_LOG_ANNONCE_UPDATED_KO -> {
-                return "[INTERNAL] Annonce not updated: (error=\"" + this.content[0] + "\")";
+            case CLIENT_LOG_SALE_UPDATED_KO -> {
+                return "[INTERNAL] Sale not updated: (error=\"" + this.content[0] + "\")";
             }
-            case CLIENT_LOG_REMOVE_ANNONCE_OK -> {
-                return "[INTERNAL] Annonce has been removed";
+            case CLIENT_LOG_DELETE_SALE_OK -> {
+                return "[INTERNAL] Sale has been removed";
             }
-            case CLIENT_LOG_REMOVE_ANNONCE_KO -> {
-                return "[INTERNAL] Annonce not removed: (error=\"" + this.content[0] + "\")";
+            case CLIENT_LOG_DELETE_SALE_KO -> {
+                return "[INTERNAL] Sale not removed: (error=\"" + this.content[0] + "\")";
             }
-            case SERVER_LOG_REMOVE_ANNONCE -> {
-                return "[INTERNAL] Annonce removed: (owner=\"" + this.content[0] + "\", title=\"" + this.content[1] + "\", content=\"" + this.content[2] + "\", domain=\"" + this.content[3] + "\", price=" + this.content[4] + ", id=" + this.content[5] + ")";
+            case SERVER_LOG_DELETE_SALE -> {
+                return "[INTERNAL] Sale removed: (owner=\"" + this.content[0] + "\", title=\"" + this.content[1] + "\", content=\"" + this.content[2] + "\", domain=\"" + this.content[3] + "\", price=" + this.content[4] + ", id=" + this.content[5] + ")";
             }
-            case SERVER_LOG_CREATE_ANNONCE -> {
-                return "[INTERNAL] Annonce created: (owner=\"" + this.content[0] + "\", title=\"" + this.content[1] + "\", content=\"" + this.content[2] + "\", domain=\"" + this.content[3] + "\", price=" + this.content[4] + ", id=" + this.content[5] + ")";
+            case SERVER_LOG_CREATE_SALE -> {
+                return "[INTERNAL] Sale created: (owner=\"" + this.content[0] + "\", title=\"" + this.content[1] + "\", content=\"" + this.content[2] + "\", domain=\"" + this.content[3] + "\", price=" + this.content[4] + ", id=" + this.content[5] + ")";
             }
-            case SERVER_LOG_UPDATE_ANNONCE -> {
-                return "[INTERNAL] Annonce updated: (owner=\"" + this.content[0] + "\", title=\"" + this.content[1] + "\", content=\"" + this.content[2] + "\", domain=\"" + this.content[3] + "\", price=" + this.content[4] + ", id=" + this.content[5] + ")";
+            case SERVER_LOG_UPDATE_SALE -> {
+                return "[INTERNAL] Sale updated: (owner=\"" + this.content[0] + "\", title=\"" + this.content[1] + "\", content=\"" + this.content[2] + "\", domain=\"" + this.content[3] + "\", price=" + this.content[4] + ", id=" + this.content[5] + ")";
             }
             case CLIENT_LOG_DOMAIN_LIST_OK -> {
                 return "[INTERNAL] Domain list is: " + this.content[0];
@@ -85,11 +85,11 @@ public class InternalLogMessage {
             case CLIENT_LOG_DOMAIN_LIST_KO -> {
                 return "[INTERNAL] Failed to request domain list: (error=\"" + this.content[0] + "\")";
             }
-            case CLIENT_LOG_ANNONCE_FROM_DOMAIN_OK -> {
-                return "[INTERNAL] Annonces from domain are: " + this.content[0];
+            case CLIENT_LOG_SALES_FROM_DOMAIN_OK -> {
+                return "[INTERNAL] Sales from domain are: " + this.content[0];
             }
-            case CLIENT_LOG_ANNONCE_FROM_DOMAIN_KO -> {
-                return "[INTERNAL] Failed request annonce from domain: (error=\"" + this.content[0] + "\")";
+            case CLIENT_LOG_SALES_FROM_DOMAIN_KO -> {
+                return "[INTERNAL] Failed request sales from domain: (error=\"" + this.content[0] + "\")";
             }
             case CLIENT_LOG_REQUEST_PUBLIC_KEY_OK -> {
                 return "[INTERNAL] Succesfully request public key of server";

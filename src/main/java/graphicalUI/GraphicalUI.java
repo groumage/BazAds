@@ -245,7 +245,7 @@ public class GraphicalUI {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    client.updateAnnonce(titleAnnonceField.getText(), contentArea.getText(), Integer.parseInt(priceField.getText()), memoryAnnonce.getId());
+                    client.updateSale(titleAnnonceField.getText(), contentArea.getText(), Integer.parseInt(priceField.getText()), memoryAnnonce.getId());
                     titleAnnonceField.setText("");
                     contentArea.setText("");
                     priceField.setText("");
@@ -259,7 +259,7 @@ public class GraphicalUI {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    client.removeAnnonce(sales.getSelectedValue().getId());
+                    client.deleteSale(sales.getSelectedValue().getId());
                 } catch (InvalidAlgorithmParameterException | NoSuchPaddingException | IllegalBlockSizeException |
                          IOException | NoSuchAlgorithmException | BadPaddingException | InvalidKeyException ex) {
                     throw new RuntimeException(ex);
@@ -699,8 +699,8 @@ public class GraphicalUI {
 
     public void updateAnnonceList() {
         DefaultListModel<Sale> demoList = new DefaultListModel<>();
-        if (this.client.getAnnonces() != null) {
-            for (Sale a : this.client.getAnnonces()) {
+        if (this.client.getSales() != null) {
+            for (Sale a : this.client.getSales()) {
                 demoList.addElement(a);
             }
         }
