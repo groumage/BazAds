@@ -6,7 +6,7 @@
 
 :bulb: A key feature of BazAds is the secure exchange of data between the client and the server. The data is encrypted using the Advanced Encryption Standard (AES) algorithm. Furthermore, the key exchange is done using the Diffie-Hellman algorithm.
 
-:rocket: Ready to explore my project? Checkout the [documentation](https://groumage.github.io/PetitesAnnonces/Doxygen/index.html)! Don't hesitate to explore the code itself, it has a well self-explanatory structure and documentation :smile:.
+:rocket: Ready to explore my project? Checkout the [documentation](https://groumage.github.io/BazAds/Doxygen/index.html)! Don't hesitate to explore the code itself, it has a well self-explanatory structure and documentation :smile:.
 
 ## Why this project?
 
@@ -19,7 +19,7 @@
 
 ## Features
 
-- A communication protocol has been created from scratch: the RFC is available [here](https://groumage.github.io/PetitesAnnonces/Doxygen/rfc_top.html).
+- A communication protocol has been created from scratch: the RFC is available [here](https://groumage.github.io/BazAds/Doxygen/rfc_top.html).
 - BazAds allows you to publish sales for goods and services.
 - Clients can create, update, and remove a sale.
 - All exchanges are encrypted.
