@@ -78,11 +78,12 @@ import protocol.RequestDeserializer;
  * 
  * @section rfc 2. RFC
  * 
- * The RFC of the project is available at the following link: <a href="https://groumage.github.io/PetitesAnnonces/Doxygen/rfc_top.html">RFC</a>
+ * The RFC of the project is available at the following link: <a href="https://groumage.github.io/PetitesAnnonces/Doxygen/rfc_top.html">RFC</a>.
  * 
  * @section next_steps 3. Next steps
  * 
- * - Implement the UDP server of the client to allow peer-to-peer communication.
+ * - Implement the UDP server of the client to allow peer-to-peer communication. Some elements are already present in the code but are not yet functional.
+ * - Deploy a simple architecture, e.g., a central server and 3 clients, using Docker.
  */
 
 /**
